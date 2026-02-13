@@ -853,13 +853,31 @@ app.post('/make-server-5053ecf8/meeting-actions', async (c) => {
       source_meeting_url
     } = body;
 
+    // Check for existing action with same source_meeting_id and title (dedup)
+    const { data: existingActions, error: checkError } = await retryWithBackoff(async () => {
+      return await supabase
+        .from('meeting_actions')
+        .select('*')
+        .eq('source_meeting_id', source_meeting_id)
+        .eq('title', title)
+        .is('deleted_at', null)
+        .limit(1);
+    });
+
+    if (checkError) {
+      console.error('Error checking for existing meeting action:', checkError);
+    } else if (existingActions && existingActions.length > 0) {
+      console.log('Meeting action already exists, returning existing:', existingActions[0].id);
+      return c.json(existingActions[0]);
+    }
+
     const meetingAction = {
       title,
       context: context || '',
       assignee_name,
       assignee_email: assignee_email || null,
       due_date: due_date || null,
-      status: 'pending',
+      status: 'new',
       promoted_task_id: null,
       source_meeting_id,
       source_meeting_title,

@@ -43,7 +43,7 @@ export interface MeetingAction {
   assignee_name: string;
   assignee_email: string | null;
   due_date: string | null;
-  status: 'pending' | 'promoted' | 'dismissed';
+  status: 'new' | 'pending' | 'promoted' | 'dismissed';
   promoted_task_id: string | null;
   source_meeting_id: string;
   source_meeting_title: string;

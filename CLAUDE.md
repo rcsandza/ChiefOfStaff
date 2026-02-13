@@ -30,10 +30,43 @@ npm run build        # Build for production
 - Backend reads/writes to KV store using prefix-based keys
 - All entities stored as JSONB in a single `kv_store` table
 
+## Module Architecture
+
+The frontend is organized into self-contained modules with clear boundaries:
+
+**`src/components/tasks/`** — Task management module
+- Entry point: `TasksTab.tsx`
+- Components: `QuickAddBar`, `TaskSection`, `TaskCard`, `TaskDetailDrawer`, `WorkFocusSection`, `ToReadSection`, `ArchivedTasksView`
+- Responsibilities: All task CRUD operations, filtering, drag-and-drop reordering, archiving
+- May import from: `@/utils/`, `@/components/ui/`, `@/components/shared/`, `@/components/tasks/`
+
+**`src/components/meeting-actions/`** — Meeting actions triage module
+- Entry point: `MeetingActionsTab.tsx`
+- Components: `MeetingGroup`, `MeetingActionCard`, `PromoteDialog`
+- Responsibilities: Displaying meeting action items, promoting to tasks, dismissing
+- May import from: `@/utils/`, `@/components/ui/`, `@/components/meeting-actions/`
+- **Agent independence:** Should NOT import from `@/components/tasks/`
+
+**`src/components/shared/`** — Shared app-level components
+- Components: `PasswordProtection`, `Favicon`
+- Shared across multiple modules
+
+**`src/components/ui/`** — shadcn/ui primitives
+- Reusable UI components (button, input, dialog, etc.)
+- Shared across all modules
+
+**`src/utils/`** — Shared utilities and API client
+- `api.ts` — Backend API client
+- `types.ts` — TypeScript type definitions
+- `dateUtils.ts` — Date calculation helpers
+- Shared across all modules
+
 ## Key Files
 
 ### Frontend
-- `src/App.tsx` — Main application orchestrator, routing, data sync
+- `src/App.tsx` — Top-level app with tab navigation (Tasks, Meeting Actions)
+- `src/components/tasks/TasksTab.tsx` — Task management module entry point
+- `src/components/meeting-actions/MeetingActionsTab.tsx` — Meeting actions module entry point
 - `src/utils/api.ts` — API client for backend communication
 - `src/utils/types.ts` — TypeScript types for Task, Project, Attachment, MeetingAction entities
 - `src/components/ui/*` — shadcn/ui components (button, input, card, etc.)
@@ -46,9 +79,13 @@ npm run build        # Build for production
 - `supabase/functions/make-server-5053ecf8/kv_store.tsx` — Deployed KV store
 
 ### Automation
-- `scripts/granola-sync/prompt.md` — Claude extraction prompt for Granola meetings
-- `scripts/granola-sync/run.sh` — Shell wrapper for `claude --print` automation
+- `scripts/granola-sync/discover-prompt.md` — Claude prompt for discovering new meetings (Phase 1)
+- `scripts/granola-sync/extract-prompt.md` — Claude prompt for extracting action items (Phase 2)
+- `scripts/granola-sync/run.sh` — Three-phase sync script: (1) Discovery, (2) Extraction, (3) Push to backend API
+- `scripts/granola-sync/backfill.sh` — One-time script to push existing local meeting files to backend
 - `~/Library/LaunchAgents/com.chiefofstaff.granola-sync.plist` — launchd schedule (every 2 hours, weekdays 9am-7pm)
+- State tracked in `~/.chiefofstaff/granola-sync-state.json`
+- Meeting data stored in `~/.chiefofstaff/meetings/*.actions.json`
 
 ### Config
 - `vite.config.ts` — Vite configuration with `@` path alias
@@ -113,7 +150,7 @@ All entities stored in a single `kv_store` table with prefix-based keys:
   assignee_name: string;
   assignee_email: string | null;
   due_date: string | null;
-  status: 'pending' | 'promoted' | 'dismissed';
+  status: 'new' | 'pending' | 'promoted' | 'dismissed';
   promoted_task_id: string | null;
   source_meeting_id: string;
   source_meeting_title: string;
@@ -126,6 +163,12 @@ All entities stored in a single `kv_store` table with prefix-based keys:
 **Key prefix:** `meeting-action:`
 
 **Purpose:** Staging area for action items extracted from Granola meeting notes. Items can be reviewed and promoted to Tasks or dismissed.
+
+**Status workflow:**
+- `new` — Unprocessed action item, needs triage (default for newly synced items)
+- `pending` — Triaged/kept, awaiting action
+- `promoted` — Converted to a task
+- `dismissed` — Explicitly dismissed and hidden
 
 **Sync:** Automated via `claude --print` running every 2 hours (weekdays 9am-7pm). State tracked in `~/.chiefofstaff/granola-sync-state.json`.
 
