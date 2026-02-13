@@ -876,7 +876,7 @@ app.post('/make-server-5053ecf8/meeting-actions', async (c) => {
       context: context || '',
       assignee_name,
       assignee_email: assignee_email || null,
-      due_date: due_date || null,
+      due_date: due_date || new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       status: 'new',
       promoted_task_id: null,
       source_meeting_id,

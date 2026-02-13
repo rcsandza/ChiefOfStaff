@@ -11,9 +11,10 @@ interface MeetingGroupProps {
   onKeep: (action: MeetingAction) => void;
   onPromote: (action: MeetingAction) => void;
   onDismiss: (action: MeetingAction) => void;
+  onUpdateDueDate?: (action: MeetingAction, date: string | null) => void;
 }
 
-export function MeetingGroup({ meeting, actions, onKeep, onPromote, onDismiss }: MeetingGroupProps) {
+export function MeetingGroup({ meeting, actions, onKeep, onPromote, onDismiss, onUpdateDueDate }: MeetingGroupProps) {
   const [isOpen, setIsOpen] = React.useState(() => {
     // Default to open if there are new or pending actions
     return actions.some(a => a.status === 'new' || a.status === 'pending');
@@ -110,6 +111,7 @@ export function MeetingGroup({ meeting, actions, onKeep, onPromote, onDismiss }:
               onKeep={onKeep}
               onPromote={onPromote}
               onDismiss={onDismiss}
+              onUpdateDueDate={onUpdateDueDate}
             />
           ))}
         </div>

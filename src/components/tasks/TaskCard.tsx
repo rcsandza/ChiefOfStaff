@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Task, Project, Attachment } from '../utils/types';
-import { formatDate, getDaysOverdue } from '../utils/dateUtils';
-import { Checkbox } from './ui/checkbox';
+import { Task, Project, Attachment } from '@/utils/types';
+import { formatDate, getDaysOverdue } from '@/utils/dateUtils';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Paperclip, User, Briefcase, Clock, Check, ChevronDown, Edit, Download, FileText, Archive } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { fetchAttachments } from '../utils/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { fetchAttachments } from '@/utils/api';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 

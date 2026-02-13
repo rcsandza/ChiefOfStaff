@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Task, Project } from '../utils/types';
-import { fetchArchivedTasks, updateTask } from '../utils/api';
-import { formatDate, formatTimestamp } from '../utils/dateUtils';
-import { Checkbox } from './ui/checkbox';
-import { Button } from './ui/button';
+import { Task, Project } from '@/utils/types';
+import { fetchArchivedTasks, updateTask } from '@/utils/api';
+import { formatDate, formatTimestamp } from '@/utils/dateUtils';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Briefcase, Calendar } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 

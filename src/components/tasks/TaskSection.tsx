@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Task, Project, DateSection } from '../utils/types';
-import { getSectionTitle, getSectionEmptyMessage } from '../utils/dateUtils';
-import { TaskCard } from './TaskCard';
+import { Task, Project, DateSection } from '@/utils/types';
+import { getSectionTitle, getSectionEmptyMessage } from '@/utils/dateUtils';
+import { TaskCard } from '@/components/tasks/TaskCard';
 import { ChevronDown } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 interface TaskSectionProps {
   section: DateSection;

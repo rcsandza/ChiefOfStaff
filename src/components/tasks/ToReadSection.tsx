@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Task, Project } from '../utils/types';
-import { Checkbox } from './ui/checkbox';
+import { Task, Project } from '@/utils/types';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Archive, Trash2, ChevronDown } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import ReactMarkdown from 'react-markdown';
 
 interface ToReadSectionProps {

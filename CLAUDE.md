@@ -170,6 +170,8 @@ All entities stored in a single `kv_store` table with prefix-based keys:
 - `promoted` — Converted to a task
 - `dismissed` — Explicitly dismissed and hidden
 
+**Due date:** Defaults to 3 days from creation for new meeting actions. Users can edit dates inline via the calendar picker in the UI.
+
 **Sync:** Automated via `claude --print` running every 2 hours (weekdays 9am-7pm). State tracked in `~/.chiefofstaff/granola-sync-state.json`.
 
 ## Path Aliases & Conventions

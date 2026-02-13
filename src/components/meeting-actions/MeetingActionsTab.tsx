@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { MeetingAction, Meeting } from '@/utils/types';
 import { fetchMeetingActions, fetchMeetings, updateMeetingAction } from '@/utils/api';
 import { MeetingGroup } from './MeetingGroup';
+import { MeetingActionCard } from './MeetingActionCard';
 import { PromoteDialog } from './PromoteDialog';
+import { SyncRunsView } from './SyncRunsView';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, FileText } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { Toaster } from '@/components/ui/sonner';
 
 export function MeetingActionsTab() {
+  const [currentView, setCurrentView] = useState<'actions' | 'logs'>('actions');
   const [meetingActions, setMeetingActions] = useState<MeetingAction[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'pending' | 'promoted' | 'dismissed'>('new');
   const [assigneeFilter, setAssigneeFilter] = useState<'all' | 'me' | 'others'>('all');
+  const [viewMode, setViewMode] = useState<'by-meeting' | 'by-due-date'>('by-meeting');
   const [promoteTarget, setPromoteTarget] = useState<MeetingAction | null>(null);
   const [isPromoteDialogOpen, setIsPromoteDialogOpen] = useState(false);
 
@@ -92,6 +96,17 @@ export function MeetingActionsTab() {
     }
   };
 
+  const handleUpdateDueDate = async (action: MeetingAction, date: string | null) => {
+    try {
+      await updateMeetingAction(action.id, { due_date: date });
+      setMeetingActions(prev => prev.map(a => a.id === action.id ? { ...a, due_date: date } : a));
+      toast.success(date ? 'Due date updated' : 'Due date cleared');
+    } catch (error) {
+      console.error('Failed to update due date:', error);
+      toast.error('Failed to update due date');
+    }
+  };
+
   const handlePromoteSuccess = () => {
     loadData();
   };
@@ -122,7 +137,7 @@ export function MeetingActionsTab() {
     return true;
   });
 
-  // Group actions by meeting
+  // Group actions by meeting (for by-meeting view)
   const actionsByMeeting = filteredActions.reduce((acc, action) => {
     const meetingId = action.source_meeting_id;
     if (!acc[meetingId]) {
@@ -139,6 +154,15 @@ export function MeetingActionsTab() {
     const dateA = meetingA?.date || actionsByMeeting[a][0]?.source_meeting_date || '';
     const dateB = meetingB?.date || actionsByMeeting[b][0]?.source_meeting_date || '';
     return dateB.localeCompare(dateA);
+  });
+
+  // Sort actions by due date (for by-due-date view)
+  const sortedActionsByDueDate = [...filteredActions].sort((a, b) => {
+    // Null dates go last
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return a.due_date.localeCompare(b.due_date);
   });
 
   // Count actions by status
@@ -159,6 +183,16 @@ export function MeetingActionsTab() {
     );
   }
 
+  // Show sync logs view
+  if (currentView === 'logs') {
+    return (
+      <>
+        <SyncRunsView onClose={() => setCurrentView('actions')} />
+        <Toaster position="top-center" />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -166,15 +200,26 @@ export function MeetingActionsTab() {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-semibold">Meeting Actions</h1>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              className="gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentView('logs')}
+                className="gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Logs
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </div>
           </div>
 
           {/* Status Filter Bar */}
@@ -272,12 +317,30 @@ export function MeetingActionsTab() {
               </Badge>
             </Button>
           </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex gap-2 mt-3">
+            <Button
+              variant={viewMode === 'by-meeting' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('by-meeting')}
+            >
+              By Meeting
+            </Button>
+            <Button
+              variant={viewMode === 'by-due-date' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('by-due-date')}
+            >
+              By Due Date
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-6">
-        {sortedMeetingIds.length === 0 ? (
+        {filteredActions.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p>No meeting actions found.</p>
             {(statusFilter !== 'all' || assigneeFilter !== 'all') && (
@@ -293,7 +356,7 @@ export function MeetingActionsTab() {
               </Button>
             )}
           </div>
-        ) : (
+        ) : viewMode === 'by-meeting' ? (
           <div className="space-y-4">
             {sortedMeetingIds.map(meetingId => {
               const meeting = meetings.find(m => m.id === meetingId) || null;
@@ -306,9 +369,24 @@ export function MeetingActionsTab() {
                   onKeep={handleKeep}
                   onPromote={handlePromote}
                   onDismiss={handleDismiss}
+                  onUpdateDueDate={handleUpdateDueDate}
                 />
               );
             })}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sortedActionsByDueDate.map(action => (
+              <MeetingActionCard
+                key={action.id}
+                action={action}
+                onKeep={handleKeep}
+                onPromote={handlePromote}
+                onDismiss={handleDismiss}
+                onUpdateDueDate={handleUpdateDueDate}
+                showMeetingSource={true}
+              />
+            ))}
           </div>
         )}
       </main>
