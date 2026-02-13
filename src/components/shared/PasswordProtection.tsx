@@ -56,7 +56,7 @@ export function PasswordProtection({ children, correctPassword = 'taskflow2024' 
             >
               <Lock className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-center mb-2">Welcome to TaskBase</h1>
+            <h1 className="text-center mb-2">Welcome to Chief of Staff</h1>
             <p className="text-center text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
               Enter the password to access your tasks
             </p>

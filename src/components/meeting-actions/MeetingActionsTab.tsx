@@ -7,11 +7,16 @@ import { PromoteDialog } from './PromoteDialog';
 import { SyncRunsView } from './SyncRunsView';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, FileText } from 'lucide-react';
+import { RefreshCw, FileText, ListTodo, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { Toaster } from '@/components/ui/sonner';
 
-export function MeetingActionsTab() {
+interface MeetingActionsTabProps {
+  activeTab: 'tasks' | 'meeting-actions';
+  onTabChange: (tab: 'tasks' | 'meeting-actions') => void;
+}
+
+export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabProps) {
   const [currentView, setCurrentView] = useState<'actions' | 'logs'>('actions');
   const [meetingActions, setMeetingActions] = useState<MeetingAction[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -196,11 +201,32 @@ export function MeetingActionsTab() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
+      <header className="bg-card border-b border-border sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-semibold">Meeting Actions</h1>
+            <h1 className="text-2xl font-semibold">Chief of Staff</h1>
             <div className="flex items-center gap-2">
+              {/* Tab toggle icons */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onTabChange('tasks')}
+                title="Tasks"
+              >
+                <ListTodo className="w-5 h-5" />
+              </Button>
+              <Button
+                variant={activeTab === 'meeting-actions' ? 'default' : 'ghost'}
+                size="icon"
+                onClick={() => onTabChange('meeting-actions')}
+                title="Meeting Actions"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+
+              {/* Separator */}
+              <div className="w-px h-6 bg-border mx-1" />
+
               <Button
                 variant="ghost"
                 size="sm"

@@ -25,7 +25,7 @@ export function Favicon() {
     document.head.appendChild(link);
     
     // Also set the title
-    document.title = 'TaskBase';
+    document.title = 'Chief of Staff';
     
     // Cleanup
     return () => {

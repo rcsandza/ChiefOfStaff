@@ -9,14 +9,19 @@ import { ToReadSection } from '@/components/tasks/ToReadSection';
 import { TaskDetailDrawer } from '@/components/tasks/TaskDetailDrawer';
 import { ArchivedTasksView } from '@/components/tasks/ArchivedTasksView';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, User, Briefcase, X, Edit, Trash2, Check, Archive } from 'lucide-react';
+import { Search, Plus, User, Briefcase, X, Edit, Trash2, Check, Archive, ListTodo, MessageSquare } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner@2.0.3';
 import { Toaster } from '@/components/ui/sonner';
 
-export function TasksTab() {
+interface TasksTabProps {
+  activeTab: 'tasks' | 'meeting-actions';
+  onTabChange: (tab: 'tasks' | 'meeting-actions') => void;
+}
+
+export function TasksTab({ activeTab, onTabChange }: TasksTabProps) {
   const [currentView, setCurrentView] = useState<'main' | 'archive'>('main');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -384,11 +389,32 @@ export function TasksTab() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-10">
+      <header className="bg-card border-b border-border sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4" ref={filterPanelRef}>
           <div className="flex items-center justify-between">
-            <h1>TaskBase</h1>
+            <h1>Chief of Staff</h1>
             <div className="flex items-center gap-2">
+              {/* Tab toggle icons */}
+              <Button
+                variant={activeTab === 'tasks' ? 'default' : 'ghost'}
+                size="icon"
+                onClick={() => onTabChange('tasks')}
+                title="Tasks"
+              >
+                <ListTodo className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onTabChange('meeting-actions')}
+                title="Meeting Actions"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </Button>
+
+              {/* Separator */}
+              <div className="w-px h-6 bg-border mx-1" />
+
               <Button
                 variant="ghost"
                 size="icon"
