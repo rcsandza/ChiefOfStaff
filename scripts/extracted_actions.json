@@ -1,0 +1,532 @@
+[
+  {
+    "title": "Represent GTM infrastructure concerns at exec offsite",
+    "context": "During GTM foundations/gaps discussion, Ray committed to represent GTM infrastructure concerns (event ingestion delays, marketing automation gaps, CDP strategy) at the exec offsite scheduled for next week.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": "2026-02-13",
+    "source_meeting_id": "901808b6-3cf7-439b-a7a3-a3fbed4861c6",
+    "source_meeting_title": "GTM foundations/gaps",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Meet with Vlad directly on GTM stack vision",
+    "context": "Following discussion about lack of OKR kickoff and planning from engineering on GTM stack roadmap, Ray committed to meeting with Vlad directly to discuss the vision and requirements.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "901808b6-3cf7-439b-a7a3-a3fbed4861c6",
+    "source_meeting_title": "GTM foundations/gaps",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Create specific data ingestion examples for Ray",
+    "context": "Susie and Darin committed to creating specific examples of data ingestion needs to help Ray advocate for GTM resources at the exec offsite.",
+    "assignee_name": "Susie",
+    "assignee_email": "skim@joinhomebase.com",
+    "due_date": "2026-02-12",
+    "source_meeting_id": "901808b6-3cf7-439b-a7a3-a3fbed4861c6",
+    "source_meeting_title": "GTM foundations/gaps",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Optimize customer prep tool prompts based on feedback",
+    "context": "Jeremy is working on prompt optimization for the Vibe customer prep tool. Feedback from Deb and others indicates prompts are too verbose and need consolidation. Also need to fix references to non-existent 'stage' labels (should be 'value milestones').",
+    "assignee_name": "Jeremy",
+    "assignee_email": null,
+    "due_date": null,
+    "source_meeting_id": "02b09e7e-1fa5-4ba1-bd50-7ca97d03b09e",
+    "source_meeting_title": "Vibe product workflow and prompt optimization with team member",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Integrate additional Databricks data into customer prep tool",
+    "context": "The customer prep tool needs enhanced customer context from Databricks including team information and other data beyond current Salesforce opportunity/account data.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "02b09e7e-1fa5-4ba1-bd50-7ca97d03b09e",
+    "source_meeting_title": "Vibe product workflow and prompt optimization with team member",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Review one-click job post epic and add target cohort details",
+    "context": "During Sprint Framing, Ray needs to review the one-click job post epic which is missing target cohort definition (SQL query needed). This is top priority for trial flow improvements.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": "2026-02-09",
+    "source_meeting_id": "b28cbef6-6743-4deb-99ae-895febab1d14",
+    "source_meeting_title": "💼 Hiring: Sprint Framing",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Add Ray to domain account for CNAME setup",
+    "context": "Bob needs to add Ray to the domain account so Ray can provide CNAME update instructions via screenshots. This is for the SSL certificate workaround that takes 10 minutes plus half day to go live.",
+    "assignee_name": "Bob",
+    "assignee_email": "rgao@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "b28cbef6-6743-4deb-99ae-895febab1d14",
+    "source_meeting_title": "💼 Hiring: Sprint Framing",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Create execution plan and engineer assignments for Sprint 2604",
+    "context": "Jatin and Bob need to create the execution plan and engineer assignments for Sprint 2604 starting February 16th, covering priorities like one-click job post, messaging updates, Facebook Easy Apply, and screener improvements.",
+    "assignee_name": "Jatin",
+    "assignee_email": "jbhandari@joinhomebase.com",
+    "due_date": "2026-02-13",
+    "source_meeting_id": "b28cbef6-6743-4deb-99ae-895febab1d14",
+    "source_meeting_title": "💼 Hiring: Sprint Framing",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Send final Indeed API test",
+    "context": "The team committed to sending the final Indeed API test on Monday, expecting a response soon. This is a critical blocker for job posting progress visibility.",
+    "assignee_name": "Team",
+    "assignee_email": null,
+    "due_date": "2026-02-09",
+    "source_meeting_id": "b28cbef6-6743-4deb-99ae-895febab1d14",
+    "source_meeting_title": "💼 Hiring: Sprint Framing",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Escalate ZipRecruiter contact issue through John Waldman",
+    "context": "ZipRecruiter integration has issues - current contact is unresponsive, blocking applicant flow. Invoice amounts decreased suggesting boost problems. Ray to escalate through John Waldman connections.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "3ce52b56-daf5-4d62-99ed-7d019f22c44a",
+    "source_meeting_title": "💼 Hiring: Half-Baked Demos + Standupni",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Enable Claude Cowork access for 10 trusted users",
+    "context": "Ray is working with Ali to enable Claude Cowork access for 10 trusted users. Access is currently blocked by security review but critical for staying current with cutting-edge AI tools.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "ba835888-7eec-4a43-b57e-e510e5aa5ef0",
+    "source_meeting_title": "Quick check in: Ray/John",
+    "source_meeting_date": "2026-02-06"
+  },
+  {
+    "title": "Review priority scoring logic and simulation tools in St. Pete",
+    "context": "Ray and Roy committed to reviewing the priority scoring logic and Monte Carlo simulation tools during the St. Pete meeting. Ray built simulation tools using Streamlit to compare lead scoring versions.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "60264c89-3535-41f2-bc0b-07892350dab0",
+    "source_meeting_title": "Ray/Roi Weekly",
+    "source_meeting_date": "2026-02-05"
+  },
+  {
+    "title": "Be more hands-on with Vlad on tech stack project",
+    "context": "Roy committed to being more hands-on with Vlad on the tech stack project, which aims to solve data infrastructure frustrations but has timeline pushed to end of H1.",
+    "assignee_name": "Roy",
+    "assignee_email": "rchobadi@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "60264c89-3535-41f2-bc0b-07892350dab0",
+    "source_meeting_title": "Ray/Roi Weekly",
+    "source_meeting_date": "2026-02-05"
+  },
+  {
+    "title": "Lead next week's builder culture presentation structure",
+    "context": "Andrea will lead the structure for next week's exec team presentation on builder culture. Ray will prepare 3 internal app examples (customer maps, data pipeline automation, A/B test analyzer).",
+    "assignee_name": "Andrea",
+    "assignee_email": "acorey@joinhomebase.com",
+    "due_date": "2026-02-12",
+    "source_meeting_id": "aa20f51f-7394-4624-a755-d501f2cd0f65",
+    "source_meeting_title": "Ray / Andrea - Builders Sync placeholder",
+    "source_meeting_date": "2026-02-05"
+  },
+  {
+    "title": "Prepare 3 internal app examples for exec team presentation",
+    "context": "Ray needs to prepare 3 internal app examples for the exec team presentation on builder culture: customer maps, data pipeline automation, and A/B test analyzer to demonstrate internal tool building.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": "2026-02-12",
+    "source_meeting_id": "aa20f51f-7394-4624-a755-d501f2cd0f65",
+    "source_meeting_title": "Ray / Andrea - Builders Sync placeholder",
+    "source_meeting_date": "2026-02-05"
+  },
+  {
+    "title": "Determine organizational ownership for compliance engine",
+    "context": "Ray and Ankit need to determine organizational ownership for the compliance engine system. Preference is for a non-engineering team to own the operationalization.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "84fbdc2e-41a4-473e-affc-bf4d4ce65ffc",
+    "source_meeting_title": "Compliance Operational Review - one off",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Decide 2026 compliance investment scope",
+    "context": "Rachel and Ankit need to decide the 2026 compliance investment scope: limited scope (top 3 areas distributed to existing teams) vs full compliance library/HR Pro replacement requiring dedicated resources.",
+    "assignee_name": "Rachel",
+    "assignee_email": "rachel@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "84fbdc2e-41a4-473e-affc-bf4d4ce65ffc",
+    "source_meeting_title": "Compliance Operational Review - one off",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Draft detailed plan for resume integration with profiles",
+    "context": "Manan committed to drafting a detailed plan for resume integration with profiles. The conversation has been 'swirling' and needs specifications written down. Jeff should be involved for design experience.",
+    "assignee_name": "Manan",
+    "assignee_email": "mkothari@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "3ab384f4-ec00-4626-8bca-e17adde55bc7",
+    "source_meeting_title": "Manan / Ray Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Analyze 1000 job description prompts for deal breaker patterns",
+    "context": "Cindy will analyze 1000 job description prompts to identify patterns for automatic deal breaker detection. This supports the implementation of deal breakers feature.",
+    "assignee_name": "Cindy",
+    "assignee_email": "clemus@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "fcfdff71-ae75-4083-9355-71cd1a042dbf",
+    "source_meeting_title": "Discuss Roadmap / Priorities",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Review trial flow experiments and prioritize personalization",
+    "context": "Cindy needs to review trial flow experiments and prioritize non-generic personalization approaches. Focus on hyper-targeted vs generic banner approach for top-of-funnel.",
+    "assignee_name": "Cindy",
+    "assignee_email": "clemus@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "fcfdff71-ae75-4083-9355-71cd1a042dbf",
+    "source_meeting_title": "Discuss Roadmap / Priorities",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Post Salesforce requests in Cirrus channel",
+    "context": "Jatin needs to post in the Cirrus channel to get Carlos support for auto-opportunity creation. If no response in 24 hours, escalate to Ray.",
+    "assignee_name": "Jatin",
+    "assignee_email": "jbhandari@joinhomebase.com",
+    "due_date": "2026-02-05",
+    "source_meeting_id": "8f0e839c-2ccd-4d1c-ad73-753bfffae935",
+    "source_meeting_title": "Hiring Business Review - Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Create dashboard redesign video",
+    "context": "Cindy will create a dashboard redesign video. Winner gets $100. This is for the dashboard release announcement.",
+    "assignee_name": "Cindy",
+    "assignee_email": "clemus@joinhomebase.com",
+    "due_date": "2026-02-06",
+    "source_meeting_id": "8f0e839c-2ccd-4d1c-ad73-753bfffae935",
+    "source_meeting_title": "Hiring Business Review - Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Clean up self-upgraded subscription opportunities in Salesforce",
+    "context": "Zuara needs to clean up self-upgraded subscription opportunities in Salesforce to maintain data accuracy.",
+    "assignee_name": "Zuara",
+    "assignee_email": "dezuara@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "8f0e839c-2ccd-4d1c-ad73-753bfffae935",
+    "source_meeting_title": "Hiring Business Review - Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Follow up with Bob/Shamir on HB1 table progress",
+    "context": "Nelson needs to follow up with Bob and Shamir on HB1 table progress for data integration work.",
+    "assignee_name": "Nelson",
+    "assignee_email": "ntang@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "8f0e839c-2ccd-4d1c-ad73-753bfffae935",
+    "source_meeting_title": "Hiring Business Review - Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Configure Vercel subdomain for jobs page",
+    "context": "Ray needs to configure the Vercel subdomain for the jobs page to enable Google Calendar integration and job page experiment launch.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": "2026-02-06",
+    "source_meeting_id": "8f0e839c-2ccd-4d1c-ad73-753bfffae935",
+    "source_meeting_title": "Hiring Business Review - Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Coordinate dashboard email with notes feature inclusion",
+    "context": "Catherine needs to coordinate the dashboard email announcement to include the notes feature. Email pushed to Friday to ensure product is fully available before driving traffic.",
+    "assignee_name": "Catherine",
+    "assignee_email": "cstclair@joinhomebase.com",
+    "due_date": "2026-02-07",
+    "source_meeting_id": "8f0e839c-2ccd-4d1c-ad73-753bfffae935",
+    "source_meeting_title": "Hiring Business Review - Weekly",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Connect with John and Katherine on geo blitz hiring integration",
+    "context": "Katie committed to connecting with John and Katherine regarding geo blitz hiring integration during the MBR.",
+    "assignee_name": "Katie",
+    "assignee_email": "kdaire@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "453016f1-8fdf-4c06-90a5-80c79e184352",
+    "source_meeting_title": "MBR - OKR 2026",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Set up call with Ray and Roy on GTM data use cases",
+    "context": "Vlad needs to set up a call with Ray and Roy to discuss GTM data use cases and rev ops needs following the MBR discussion about GTM infrastructure gaps.",
+    "assignee_name": "Vlad",
+    "assignee_email": "vakimenko@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "453016f1-8fdf-4c06-90a5-80c79e184352",
+    "source_meeting_title": "MBR - OKR 2026",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Emergency triage session with Ray on data access fast-lane",
+    "context": "Kanchana needs to set up an emergency triage session with Ray on data access fast-lane to address immediate needs while waiting for infrastructure improvements.",
+    "assignee_name": "Kanchana",
+    "assignee_email": "kpadmanabhan@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "453016f1-8fdf-4c06-90a5-80c79e184352",
+    "source_meeting_title": "MBR - OKR 2026",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Share customer conversation repository folder company-wide",
+    "context": "Jan committed to sharing the customer conversation repository folder company-wide so teams can access customer feedback and insights.",
+    "assignee_name": "Jan",
+    "assignee_email": "jsundar@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "453016f1-8fdf-4c06-90a5-80c79e184352",
+    "source_meeting_title": "MBR - OKR 2026",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Coordinate new Zoom setup for future recordings",
+    "context": "Rachel needs to coordinate new Zoom setup for future MBR recordings to ensure meetings are properly captured.",
+    "assignee_name": "Rachel",
+    "assignee_email": "rachel@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "453016f1-8fdf-4c06-90a5-80c79e184352",
+    "source_meeting_title": "MBR - OKR 2026",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Share daily experiment methodology with Ray and Zura",
+    "context": "Roy committed to sharing the daily experiment methodology with Ray and Zura during the MBR discussion.",
+    "assignee_name": "Roy",
+    "assignee_email": "rchobadi@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "453016f1-8fdf-4c06-90a5-80c79e184352",
+    "source_meeting_title": "MBR - OKR 2026",
+    "source_meeting_date": "2026-02-04"
+  },
+  {
+    "title": "Meet with Fadi to discuss customer pain points and AI improvements",
+    "context": "Divij committed to meeting with Fadi to review customer chat transcripts, feedback repositories, and explore opportunities for resume parsing, deal breakers, and top matches collaboration.",
+    "assignee_name": "Divij",
+    "assignee_email": "dgupta@joinhomebase.com",
+    "due_date": "2026-02-04",
+    "source_meeting_id": "da5d3544-2e6f-4609-a1f8-f873f28ba9c8",
+    "source_meeting_title": "Divij / Ray",
+    "source_meeting_date": "2026-02-03"
+  },
+  {
+    "title": "Connect with Jotin for roadmap visibility and prioritization",
+    "context": "Divij needs to connect with Jotin (Jatin) for better roadmap visibility and prioritization clarity to understand what work is planned vs. self-directed exploration.",
+    "assignee_name": "Divij",
+    "assignee_email": "dgupta@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "da5d3544-2e6f-4609-a1f8-f873f28ba9c8",
+    "source_meeting_title": "Divij / Ray",
+    "source_meeting_date": "2026-02-03"
+  },
+  {
+    "title": "Provide embedded insights API documentation for Sammy's review",
+    "context": "Mitratech (Chris Parto) will provide embedded insights API documentation for Sammy's technical review as part of the Mineral CaaS embedded product evaluation.",
+    "assignee_name": "Chris Parto",
+    "assignee_email": "chris.parto@mitratech.com",
+    "due_date": null,
+    "source_meeting_id": "65a5d7b1-8511-48b7-b29c-4be827ae1ec9",
+    "source_meeting_title": "Connect with Ray (Homebase) on Mineral CaaS Embedded",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Create consolidated roadmap document with mini-PRDs",
+    "context": "Jon committed to creating a comprehensive roadmap with mini-PRDs covering both Cirrus work and general development needs for the hiring sales tools by tomorrow morning.",
+    "assignee_name": "Jon",
+    "assignee_email": "jonwanczyk@joinhomebase.com",
+    "due_date": "2026-02-03",
+    "source_meeting_id": "84a39924-d0ba-4b21-bd83-75cf5dce9e9d",
+    "source_meeting_title": "Hiring Sales Leadership roundtable",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Meet with Zuara Wednesday to understand workload and handoffs",
+    "context": "Jon will meet with Zuara on Wednesday to understand her workload and how handoffs should work with the new Lee management structure.",
+    "assignee_name": "Jon",
+    "assignee_email": "jonwanczyk@joinhomebase.com",
+    "due_date": "2026-02-04",
+    "source_meeting_id": "84a39924-d0ba-4b21-bd83-75cf5dce9e9d",
+    "source_meeting_title": "Hiring Sales Leadership roundtable",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Set up TalkDesk transcription access for Jon",
+    "context": "Jon needs TalkDesk transcription access set up so he can analyze sales calls for prompt engineering improvements.",
+    "assignee_name": "Jon",
+    "assignee_email": "jonwanczyk@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "84a39924-d0ba-4b21-bd83-75cf5dce9e9d",
+    "source_meeting_title": "Hiring Sales Leadership roundtable",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Create QA checklist template for Karlos",
+    "context": "Lee is creating a QA checklist template for Karlos to reduce testing bottleneck in the Cirrus partnership workflow.",
+    "assignee_name": "Lee",
+    "assignee_email": "lwilson@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "284b275c-c91f-4e30-a310-4e8e5dc39c6c",
+    "source_meeting_title": "Homebase & Cirrius MS: Expanded Partnership",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Send pre-grooming document to EPDD leads",
+    "context": "Manan committed to sending the pre-grooming document to EPDD leads to help catch issues earlier in the development process.",
+    "assignee_name": "Manan",
+    "assignee_email": "mkothari@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "8db74bae-d795-4853-ba10-fefe5dfb7b9c",
+    "source_meeting_title": "💼 Hiring: Team Standup",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Post calendar documents/tickets in hiring channel",
+    "context": "Malcolm will post calendar-related documents and tickets in the hiring channel for team visibility.",
+    "assignee_name": "Malcolm",
+    "assignee_email": "mmaclure@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "8db74bae-d795-4853-ba10-fefe5dfb7b9c",
+    "source_meeting_title": "💼 Hiring: Team Standup",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Open Google Places API thread with Manan/Sharmin",
+    "context": "Ray will open a thread about unified Google Places API strategy since multiple teams are hitting the API separately. Opportunity for upstream automation in onboarding flow.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "8db74bae-d795-4853-ba10-fefe5dfb7b9c",
+    "source_meeting_title": "💼 Hiring: Team Standup",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Write business information automation document for pre-grooming",
+    "context": "Ray will write a document about business information automation for pre-grooming to consolidate the approach to Google Places API and business type detection.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "8db74bae-d795-4853-ba10-fefe5dfb7b9c",
+    "source_meeting_title": "💼 Hiring: Team Standup",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Schedule 2 additional conversations this week on roadmap and manual mode",
+    "context": "Cindy committed to scheduling 2 additional conversations with Ray this week: one for roadmap discussion and one for manual mode deep dive.",
+    "assignee_name": "Cindy",
+    "assignee_email": "clemus@joinhomebase.com",
+    "due_date": "2026-02-06",
+    "source_meeting_id": "7155702b-254c-4a4b-84f1-c7cb12b48cb1",
+    "source_meeting_title": "Cindy / Ray",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Take lead on zero state page design",
+    "context": "Cindy will take the lead on zero state page design, acting as marketing designer to create better personalized content for trial flow.",
+    "assignee_name": "Cindy",
+    "assignee_email": "clemus@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "7155702b-254c-4a4b-84f1-c7cb12b48cb1",
+    "source_meeting_title": "Cindy / Ray",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Deliver hiring opportunities with call count data",
+    "context": "Nelson committed to delivering the hiring opportunities data with call count information this afternoon (Feb 2) from the pre-aggregated table in Databricks.",
+    "assignee_name": "Nelson",
+    "assignee_email": "ntang@joinhomebase.com",
+    "due_date": "2026-02-02",
+    "source_meeting_id": "fbd49ce7-4b6a-4c65-98cf-a0c296cdabd3",
+    "source_meeting_title": "Nelson / Ray Weekly",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Create opportunities upsert notebook in Databricks",
+    "context": "Nelson will create an opportunities upsert notebook in Databricks to maintain opportunity ID + call count data for the priority scoring algorithm.",
+    "assignee_name": "Nelson",
+    "assignee_email": "ntang@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "fbd49ce7-4b6a-4c65-98cf-a0c296cdabd3",
+    "source_meeting_title": "Nelson / Ray Weekly",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Propose additional fields for hiring profile enhancement",
+    "context": "Nelson will propose additional fields for the hiring profile enhancement including top 3 roles hired, predicted hiring needs, historical volume, and time saved calculations.",
+    "assignee_name": "Nelson",
+    "assignee_email": "ntang@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "fbd49ce7-4b6a-4c65-98cf-a0c296cdabd3",
+    "source_meeting_title": "Nelson / Ray Weekly",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Test sales tool during calls and collect feedback",
+    "context": "Sean committed to testing Ray's new LLM-powered sales tool during calls and collecting detailed feedback notes to guide improvements.",
+    "assignee_name": "Sean",
+    "assignee_email": "sgohman@joinhomebase.com",
+    "due_date": "2026-02-02",
+    "source_meeting_id": "3d093778-be42-43ab-a1a4-a8ffc6d3546e",
+    "source_meeting_title": "Ray / Sean",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Share sales tool with other reps for broader feedback",
+    "context": "Sean will share the new sales tool with other reps to collect broader feedback on the discovery questions, value props, and objection handling features.",
+    "assignee_name": "Sean",
+    "assignee_email": "sgohman@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "3d093778-be42-43ab-a1a4-a8ffc6d3546e",
+    "source_meeting_title": "Ray / Sean",
+    "source_meeting_date": "2026-02-02"
+  },
+  {
+    "title": "Coordinate with Lee and Carlos on Sirius request management",
+    "context": "Jon will coordinate with Lee (new Sirius relationship owner) and Carlos on creating a centralized request management process for hiring-related Salesforce work.",
+    "assignee_name": "Jon",
+    "assignee_email": "jonwanczyk@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "d5b51f6b-3c91-4627-a923-45d2a4995f91",
+    "source_meeting_title": "Homebase Hiring Sales Check-in",
+    "source_meeting_date": "2026-01-29"
+  },
+  {
+    "title": "Build Salesforce report for Shark Tank call tracking",
+    "context": "Jon will investigate and build a Salesforce report to track daily Shark Tank dials vs regular prospecting. May require Kubaroo API integration with Databricks.",
+    "assignee_name": "Jon",
+    "assignee_email": "jonwanczyk@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "d5b51f6b-3c91-4627-a923-45d2a4995f91",
+    "source_meeting_title": "Homebase Hiring Sales Check-in",
+    "source_meeting_date": "2026-01-29"
+  },
+  {
+    "title": "Write technical requirements document for Justin",
+    "context": "Ray committed to writing a technical requirements document for Justin covering standalone apps, data warehouse read access, Salesforce integration, and eventually HB1 access for the builder enablement initiative.",
+    "assignee_name": "Ray",
+    "assignee_email": "ray@joinhomebase.com",
+    "due_date": null,
+    "source_meeting_id": "3b3c0b54-a2b3-4a76-87ea-5ffedc0fecd9",
+    "source_meeting_title": "Justin / Ray",
+    "source_meeting_date": "2026-01-29"
+  }
+]

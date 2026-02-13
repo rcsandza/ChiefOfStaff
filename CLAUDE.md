@@ -21,7 +21,7 @@ npm run build        # Build for production
 
 **Backend:**
 - Hono server running on Supabase Edge Functions (Deno runtime)
-- Deployed at: `https://dzuqvmnmmgqvtzdatyqg.supabase.co/functions/v1/taskbase`
+- Deployed at: `https://ctmrnprvkyxvsjkbxyyv.supabase.co/functions/v1/make-server-5053ecf8`
 - KV-store data layer (JSONB storage in single table)
 - Polling-based sync from client
 
@@ -34,14 +34,21 @@ npm run build        # Build for production
 
 ### Frontend
 - `src/App.tsx` — Main application orchestrator, routing, data sync
-- `src/api.ts` — API client for backend communication
-- `src/types.ts` — TypeScript types for Task, Project, Attachment entities
+- `src/utils/api.ts` — API client for backend communication
+- `src/utils/types.ts` — TypeScript types for Task, Project, Attachment, MeetingAction entities
 - `src/components/ui/*` — shadcn/ui components (button, input, card, etc.)
 - `src/lib/utils.ts` — Utility functions (cn helper)
 
 ### Backend
-- `supabase/functions/taskbase/index.tsx` — Hono server entry point
-- `supabase/functions/taskbase/kv_store.tsx` — KV store implementation
+- `src/supabase/functions/server/index.tsx` — Hono server entry point (source)
+- `src/supabase/functions/server/kv_store.tsx` — KV store implementation (source)
+- `supabase/functions/make-server-5053ecf8/index.ts` — Deployed Edge Function
+- `supabase/functions/make-server-5053ecf8/kv_store.tsx` — Deployed KV store
+
+### Automation
+- `scripts/granola-sync/prompt.md` — Claude extraction prompt for Granola meetings
+- `scripts/granola-sync/run.sh` — Shell wrapper for `claude --print` automation
+- `~/Library/LaunchAgents/com.chiefofstaff.granola-sync.plist` — launchd schedule (every 2 hours, weekdays 9am-7pm)
 
 ### Config
 - `vite.config.ts` — Vite configuration with `@` path alias
@@ -96,6 +103,31 @@ All entities stored in a single `kv_store` table with prefix-based keys:
 }
 ```
 **Key prefix:** `attachment:`
+
+### MeetingAction
+```typescript
+{
+  id: string;
+  title: string;
+  context: string;
+  assignee_name: string;
+  assignee_email: string | null;
+  due_date: string | null;
+  status: 'pending' | 'promoted' | 'dismissed';
+  promoted_task_id: string | null;
+  source_meeting_id: string;
+  source_meeting_title: string;
+  source_meeting_date: string;
+  source_meeting_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+```
+**Key prefix:** `meeting-action:`
+
+**Purpose:** Staging area for action items extracted from Granola meeting notes. Items can be reviewed and promoted to Tasks or dismissed.
+
+**Sync:** Automated via `claude --print` running every 2 hours (weekdays 9am-7pm). State tracked in `~/.chiefofstaff/granola-sync-state.json`.
 
 ## Path Aliases & Conventions
 

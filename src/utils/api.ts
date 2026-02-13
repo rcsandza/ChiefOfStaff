@@ -1,4 +1,4 @@
-import { Task, Project, Attachment } from './types';
+import { Task, Project, Attachment, MeetingAction, Meeting, SyncRun } from './types';
 
 const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
 const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -382,7 +382,7 @@ export async function reorderTask(
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const clientToday = `${year}-${month}-${day}`;
-    
+
     console.log('Reordering task:', { taskId, targetSection, beforeTaskId, afterTaskId, clientToday });
     const response = await fetch(`${BASE_URL}/tasks/${taskId}/reorder`, {
       method: 'POST',
@@ -400,5 +400,150 @@ export async function reorderTask(
   } catch (error) {
     console.error('Error reordering task:', error);
     throw error;
+  }
+}
+
+// Meeting Actions
+export async function fetchMeetingActions(): Promise<MeetingAction[]> {
+  try {
+    return await retryFetch(async () => {
+      const response = await fetch(`${BASE_URL}/meeting-actions`, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch meeting actions:', response.status, errorText);
+        return [];
+      }
+      const data = await response.json();
+      console.log('Fetched meeting actions:', data.meeting_actions?.length || 0);
+      return data.meeting_actions || [];
+    });
+  } catch (error) {
+    console.error('Error fetching meeting actions after retries:', error);
+    return [];
+  }
+}
+
+export async function createMeetingAction(meetingAction: Partial<MeetingAction>): Promise<MeetingAction> {
+  try {
+    console.log('Creating meeting action:', meetingAction);
+    const response = await fetch(`${BASE_URL}/meeting-actions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(meetingAction),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to create meeting action:', response.status, errorText);
+      throw new Error(`Failed to create meeting action: ${response.status}`);
+    }
+    const createdMeetingAction = await response.json();
+    console.log('Meeting action created successfully:', createdMeetingAction);
+    return createdMeetingAction;
+  } catch (error) {
+    console.error('Error creating meeting action:', error);
+    throw error;
+  }
+}
+
+export async function updateMeetingAction(id: string, updates: Partial<MeetingAction>): Promise<MeetingAction> {
+  try {
+    console.log('Updating meeting action:', id, updates);
+    const response = await fetch(`${BASE_URL}/meeting-actions/${id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(updates),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to update meeting action:', response.status, errorText);
+      throw new Error(`Failed to update meeting action: ${response.status}`);
+    }
+    const updatedMeetingAction = await response.json();
+    console.log('Meeting action updated successfully:', updatedMeetingAction);
+    return updatedMeetingAction;
+  } catch (error) {
+    console.error('Error updating meeting action:', error);
+    throw error;
+  }
+}
+
+export async function deleteMeetingAction(id: string): Promise<void> {
+  try {
+    console.log('Deleting meeting action:', id);
+    const response = await fetch(`${BASE_URL}/meeting-actions/${id}`, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to delete meeting action:', response.status, errorText);
+      throw new Error(`Failed to delete meeting action: ${response.status}`);
+    }
+    console.log('Meeting action deleted successfully:', id);
+  } catch (error) {
+    console.error('Error deleting meeting action:', error);
+    throw error;
+  }
+}
+
+// Meetings
+export async function fetchMeetings(): Promise<Meeting[]> {
+  try {
+    return await retryFetch(async () => {
+      const response = await fetch(`${BASE_URL}/meetings`, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch meetings:', response.status, errorText);
+        return [];
+      }
+      const data = await response.json();
+      console.log('Fetched meetings:', data.meetings?.length || 0);
+      return data.meetings || [];
+    });
+  } catch (error) {
+    console.error('Error fetching meetings after retries:', error);
+    return [];
+  }
+}
+
+export async function fetchMeeting(id: string): Promise<Meeting | null> {
+  try {
+    return await retryFetch(async () => {
+      const response = await fetch(`${BASE_URL}/meetings/${id}`, { headers });
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        const errorText = await response.text();
+        console.error('Failed to fetch meeting:', response.status, errorText);
+        return null;
+      }
+      const meeting = await response.json();
+      console.log('Fetched meeting:', meeting.id);
+      return meeting;
+    });
+  } catch (error) {
+    console.error('Error fetching meeting after retries:', error);
+    return null;
+  }
+}
+
+// Sync Runs
+export async function fetchSyncRuns(): Promise<SyncRun[]> {
+  try {
+    return await retryFetch(async () => {
+      const response = await fetch(`${BASE_URL}/sync-runs`, { headers });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch sync runs:', response.status, errorText);
+        return [];
+      }
+      const data = await response.json();
+      console.log('Fetched sync runs:', data.sync_runs?.length || 0);
+      return data.sync_runs || [];
+    });
+  } catch (error) {
+    console.error('Error fetching sync runs after retries:', error);
+    return [];
   }
 }
