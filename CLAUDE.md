@@ -36,7 +36,7 @@ The frontend is organized into self-contained modules with clear boundaries:
 
 **`src/components/tasks/`** — Task management module
 - Entry point: `TasksTab.tsx`
-- Components: `QuickAddBar`, `TaskSection`, `TaskCard`, `TaskDetailDrawer`, `WorkFocusSection`, `ToReadSection`, `ArchivedTasksView`
+- Components: `QuickAddBar`, `TaskSection`, `TaskCard`, `TaskDetailDrawer`, `SpecialTaskSection`, `ArchivedTasksView`
 - Responsibilities: All task CRUD operations, filtering, drag-and-drop reordering, archiving
 - May import from: `@/utils/`, `@/components/ui/`, `@/components/shared/`, `@/components/tasks/`
 

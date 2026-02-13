@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { fetchAttachments } from '@/utils/api';
-import ReactMarkdown from 'react-markdown';
-import remarkBreaks from 'remark-breaks';
+import { MarkdownContent } from '@/components/shared/MarkdownContent';
+import { ProjectBadge } from '@/components/shared/ProjectBadge';
 
 interface TaskCardProps {
   task: Task;
@@ -38,11 +38,15 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
   useEffect(() => {
     if (isExpanded && attachmentCount > 0 && attachments.length === 0 && !isLoadingAttachments) {
       setIsLoadingAttachments(true);
-      fetchAttachments(task.id).then((data) => {
-        setAttachments(data);
+      fetchAttachments(task.id).then(({ data, error }) => {
+        if (data) {
+          setAttachments(data);
+        } else if (error) {
+          console.error('Failed to load attachments:', error);
+        }
         setIsLoadingAttachments(false);
       }).catch((error) => {
-        console.error('Error loading attachments:', error);
+        console.error('Unexpected error loading attachments:', error);
         setIsLoadingAttachments(false);
       });
     }
@@ -126,7 +130,7 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
                     }
                   }}
                   className="h-8 flex-1"
-                  style={{ borderRadius: 'var(--radius-input)' }}
+                 
                   autoFocus
                 />
                 <Button
@@ -134,7 +138,7 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
                   size="sm"
                   onClick={handleSaveTitle}
                   className="h-8 w-8 p-0 flex-shrink-0"
-                  style={{ borderRadius: 'var(--radius-button)' }}
+                 
                 >
                   <Check className="w-4 h-4 text-primary" />
                 </Button>
@@ -150,20 +154,9 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
                 {task.title}
               </div>
             )}
-            
+
             {/* Project tag */}
-            {project && (
-              <span
-                className="inline-flex items-center px-2 py-0.5 rounded caption flex-shrink-0"
-                style={{
-                  backgroundColor: project.color + '20',
-                  color: project.color,
-                  borderRadius: 'var(--radius)',
-                }}
-              >
-                {project.name}
-              </span>
-            )}
+            {project && <ProjectBadge project={project} />}
             
             {/* Overdue badge */}
             {isOverdue && task.status === 'open' && (
@@ -270,23 +263,11 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
         {task.description && (
           <div className="mb-3">
             <span className="caption text-muted-foreground block mb-1">Description:</span>
-            <div className="text-foreground prose prose-sm max-w-none" style={{ fontSize: 'var(--text-sm)' }}>
-              <ReactMarkdown
-                remarkPlugins={[remarkBreaks]}
-                components={{
-                  a: ({ node, ...props }) => (
-                    <a
-                      {...props}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ),
-                }}
-              >
-                {task.description}
-              </ReactMarkdown>
-            </div>
+            <MarkdownContent
+              content={task.description}
+              className="text-foreground"
+              onLinkClick={(e) => e.stopPropagation()}
+            />
           </div>
         )}
         
@@ -315,7 +296,6 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
                       onClick={(e) => {
                         if (!attachment.signed_url) {
                           e.preventDefault();
-                          console.error('No signed URL available for attachment');
                         }
                       }}
                     >
@@ -328,7 +308,6 @@ export function TaskCard({ task, projects, attachmentCount, onToggleStatus, onCl
                       onClick={(e) => {
                         if (!attachment.signed_url) {
                           e.preventDefault();
-                          console.error('No signed URL available for attachment');
                         }
                       }}
                     >

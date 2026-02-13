@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, FileText, ListTodo, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
-import { Toaster } from '@/components/ui/sonner';
+import { LoadingScreen } from '@/components/shared/LoadingScreen';
+import { PageLayout } from '@/components/shared/PageLayout';
 
 interface MeetingActionsTabProps {
   activeTab: 'tasks' | 'meeting-actions';
@@ -34,16 +35,27 @@ export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabP
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [actionsData, meetingsData] = await Promise.all([
+      const [actionsResult, meetingsResult] = await Promise.all([
         fetchMeetingActions(),
         fetchMeetings(),
       ]);
 
-      setMeetingActions(actionsData);
-      setMeetings(meetingsData);
+      // Handle meeting actions
+      if (actionsResult.data) {
+        setMeetingActions(actionsResult.data);
+      } else if (actionsResult.error) {
+        console.error('Failed to load meeting actions:', actionsResult.error);
+        toast.error('Failed to load meeting actions');
+      }
+
+      // Handle meetings
+      if (meetingsResult.data) {
+        setMeetings(meetingsResult.data);
+      } else if (meetingsResult.error) {
+        console.error('Failed to load meetings:', meetingsResult.error);
+      }
     } catch (error) {
-      console.error('Failed to load meeting actions:', error);
-      toast.error('Failed to load meeting actions');
+      toast.error('Failed to load data');
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +79,6 @@ export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabP
       ));
       toast.success('Action kept');
     } catch (error) {
-      console.error('Failed to keep action:', error);
       toast.error('Failed to keep action');
     }
   };
@@ -89,14 +100,12 @@ export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabP
               ));
               toast.success('Action restored');
             } catch (error) {
-              console.error('Failed to undo dismiss:', error);
               toast.error('Failed to undo');
             }
           },
         },
       });
     } catch (error) {
-      console.error('Failed to dismiss action:', error);
       toast.error('Failed to dismiss action');
     }
   };
@@ -107,7 +116,6 @@ export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabP
       setMeetingActions(prev => prev.map(a => a.id === action.id ? { ...a, due_date: date } : a));
       toast.success(date ? 'Due date updated' : 'Due date cleared');
     } catch (error) {
-      console.error('Failed to update due date:', error);
       toast.error('Failed to update due date');
     }
   };
@@ -181,25 +189,16 @@ export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabP
   const forOthersCount = meetingActions.filter(a => !isAssignedToMe(a)).length;
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div>Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   // Show sync logs view
   if (currentView === 'logs') {
-    return (
-      <>
-        <SyncRunsView onClose={() => setCurrentView('actions')} />
-        <Toaster position="top-center" />
-      </>
-    );
+    return <SyncRunsView onClose={() => setCurrentView('actions')} />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageLayout>
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -427,9 +426,6 @@ export function MeetingActionsTab({ activeTab, onTabChange }: MeetingActionsTabP
         }}
         onSuccess={handlePromoteSuccess}
       />
-
-      {/* Toast Notifications */}
-      <Toaster position="top-center" />
-    </div>
+    </PageLayout>
   );
 }

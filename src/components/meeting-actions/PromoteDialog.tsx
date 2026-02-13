@@ -18,6 +18,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
+import { formatDateISO } from '@/utils/dateUtils';
 
 interface PromoteDialogProps {
   action: MeetingAction | null;
@@ -91,10 +92,10 @@ export function PromoteDialog({ action, isOpen, onClose, onSuccess }: PromoteDia
   }, [action, isOpen]);
 
   const loadProjects = async () => {
-    try {
-      const projectsData = await fetchProjects();
-      setProjects(projectsData);
-    } catch (error) {
+    const { data, error } = await fetchProjects();
+    if (data) {
+      setProjects(data);
+    } else if (error) {
       console.error('Failed to load projects:', error);
     }
   };
@@ -110,7 +111,7 @@ export function PromoteDialog({ action, isOpen, onClose, onSuccess }: PromoteDia
         description,
         group,
         project_id: projectId,
-        due_date: dueDate ? formatDateForApi(dueDate) : null,
+        due_date: dueDate ? formatDateISO(dueDate) : null,
         task_type: 'regular',
       });
 
@@ -124,18 +125,10 @@ export function PromoteDialog({ action, isOpen, onClose, onSuccess }: PromoteDia
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Failed to promote action:', error);
       toast.error('Failed to promote action');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatDateForApi = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   };
 
   const formatDateDisplay = (date: Date | undefined): string => {

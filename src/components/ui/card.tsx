@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "./utils";
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+function Card({ className, style, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card"
@@ -10,6 +10,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
         "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border",
         className,
       )}
+      style={{ borderRadius: 'var(--radius-card)', ...style }}
       {...props}
     />
   );

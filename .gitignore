@@ -44,3 +44,4 @@ Thumbs.db
 # Local env files
 *.local
 .env*.local
+.npm-cache/

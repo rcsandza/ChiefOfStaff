@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
+import { LoadingScreen } from '@/components/shared/LoadingScreen';
+import { PageLayout } from '@/components/shared/PageLayout';
 
 interface SyncRunsViewProps {
   onClose: () => void;
@@ -20,15 +22,14 @@ export function SyncRunsView({ onClose }: SyncRunsViewProps) {
 
   const loadSyncRuns = async () => {
     setIsLoading(true);
-    try {
-      const runs = await fetchSyncRuns();
-      setSyncRuns(runs);
-    } catch (error) {
+    const { data, error } = await fetchSyncRuns();
+    if (data) {
+      setSyncRuns(data);
+    } else if (error) {
       console.error('Failed to load sync runs:', error);
       toast.error('Failed to load sync logs');
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const formatDateTime = (dateStr: string) => {
@@ -76,15 +77,11 @@ export function SyncRunsView({ onClose }: SyncRunsViewProps) {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div>Loading...</div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageLayout>
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -157,6 +154,6 @@ export function SyncRunsView({ onClose }: SyncRunsViewProps) {
           </table>
         )}
       </main>
-    </div>
+    </PageLayout>
   );
 }

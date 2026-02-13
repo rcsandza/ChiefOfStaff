@@ -40,7 +40,7 @@ const Button = React.forwardRef<
     VariantProps<typeof buttonVariants> & {
       asChild?: boolean;
     }
->(({ className, variant, size, asChild = false, ...props }, ref) => {
+>(({ className, variant, size, asChild = false, style, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
 
   return (
@@ -48,6 +48,7 @@ const Button = React.forwardRef<
       ref={ref}
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      style={{ borderRadius: 'var(--radius-button)', ...style }}
       {...props}
     />
   );

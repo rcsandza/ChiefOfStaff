@@ -3,6 +3,7 @@ import { PasswordProtection } from './components/shared/PasswordProtection';
 import { Favicon } from './components/shared/Favicon';
 import { TasksTab } from './components/tasks/TasksTab';
 import { MeetingActionsTab } from './components/meeting-actions/MeetingActionsTab';
+import { Toaster } from '@/components/ui/sonner';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'tasks' | 'meeting-actions'>('tasks');
@@ -15,6 +16,7 @@ function App() {
       ) : (
         <MeetingActionsTab activeTab={activeTab} onTabChange={setActiveTab} />
       )}
+      <Toaster position="top-center" />
     </PasswordProtection>
   );
 }

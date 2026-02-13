@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ExternalLink, CheckCircle2, X, CalendarIcon, AlertCircle } from 'lucide-react';
-import { getDaysOverdue, formatDate as formatDateUtil } from '@/utils/dateUtils';
+import { CheckCircle2, X, CalendarIcon, AlertCircle } from 'lucide-react';
+import { getDaysOverdue, formatDate as formatDateUtil, formatDateISO } from '@/utils/dateUtils';
 
 interface MeetingActionCardProps {
   action: MeetingAction;
@@ -34,7 +34,7 @@ export function MeetingActionCard({ action, onKeep, onPromote, onDismiss, onUpda
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date && onUpdateDueDate) {
-      const formattedDate = date.toISOString().split('T')[0];
+      const formattedDate = formatDateISO(date);
       onUpdateDueDate(action, formattedDate);
       setIsDatePickerOpen(false);
     }

@@ -4,6 +4,7 @@ import { MeetingActionCard } from './MeetingActionCard';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatDateDisplay } from '@/utils/dateUtils';
 
 interface MeetingGroupProps {
   meeting: Meeting | null;
@@ -19,20 +20,6 @@ export function MeetingGroup({ meeting, actions, onKeep, onPromote, onDismiss, o
     // Default to open if there are new or pending actions
     return actions.some(a => a.status === 'new' || a.status === 'pending');
   });
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   // Use first action's metadata if meeting is not available
   const meetingTitle = meeting?.title || actions[0]?.source_meeting_title || 'Unknown Meeting';
@@ -59,7 +46,7 @@ export function MeetingGroup({ meeting, actions, onKeep, onPromote, onDismiss, o
             <h3 className="font-semibold">{meetingTitle}</h3>
             {meetingDate && (
               <p className="text-sm text-muted-foreground mt-1">
-                {formatDate(meetingDate)}
+                {formatDateDisplay(meetingDate)}
               </p>
             )}
             <div className="flex gap-3 mt-2 text-xs">

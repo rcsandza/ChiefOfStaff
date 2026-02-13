@@ -6,6 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Briefcase, Calendar } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
+import { MarkdownContent } from '@/components/shared/MarkdownContent';
+import { LoadingScreen } from '@/components/shared/LoadingScreen';
+import { PageLayout } from '@/components/shared/PageLayout';
+import { ProjectBadge } from '@/components/shared/ProjectBadge';
 
 interface ArchivedTasksViewProps {
   onBack: () => void;
@@ -32,7 +36,6 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
       });
       setArchivedTasks(tasks);
     } catch (error) {
-      console.error('Error loading archived tasks:', error);
       toast.error('Failed to load archived tasks');
     } finally {
       setIsLoading(false);
@@ -48,7 +51,6 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
       setArchivedTasks(archivedTasks.filter(t => t.id !== task.id));
       toast.success('Task unarchived');
     } catch (error) {
-      console.error('Error unarchiving task:', error);
       toast.error('Failed to unarchive task');
     }
   };
@@ -59,15 +61,11 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
   };
   
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div>Loading archived tasks...</div>
-      </div>
-    );
+    return <LoadingScreen message="Loading archived tasks..." />;
   }
   
   return (
-    <div className="min-h-screen bg-background">
+    <PageLayout>
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -76,7 +74,7 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
               variant="ghost"
               size="icon"
               onClick={onBack}
-              style={{ borderRadius: 'var(--radius-button)' }}
+             
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -100,7 +98,7 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
                 <div
                   key={task.id}
                   className="bg-card border border-border p-4"
-                  style={{ borderRadius: 'var(--radius-card)', boxShadow: 'var(--elevation-sm)' }}
+                  style={{ boxShadow: 'var(--elevation-sm)' }}
                 >
                   <div className="flex items-start gap-3">
                     {/* Group icon */}
@@ -124,20 +122,9 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <span className="line-through opacity-70">{task.title}</span>
-                        
+
                         {/* Project tag */}
-                        {project && (
-                          <span
-                            className="inline-flex items-center px-2 py-0.5 rounded caption flex-shrink-0"
-                            style={{
-                              backgroundColor: project.color + '20',
-                              color: project.color,
-                              borderRadius: 'var(--radius)',
-                            }}
-                          >
-                            {project.name}
-                          </span>
-                        )}
+                        {project && <ProjectBadge project={project} />}
                       </div>
                       
                       {/* Metadata */}
@@ -159,9 +146,9 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
                       
                       {/* Description preview */}
                       {task.description && (
-                        <p className="mt-2 text-muted-foreground caption line-clamp-2">
-                          {task.description}
-                        </p>
+                        <div className="mt-2 text-muted-foreground caption line-clamp-2">
+                          <MarkdownContent content={task.description} />
+                        </div>
                       )}
                     </div>
                     
@@ -170,7 +157,7 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
                       variant="outline"
                       size="sm"
                       onClick={() => handleUnarchive(task)}
-                      style={{ borderRadius: 'var(--radius-button)' }}
+                     
                       className="flex-shrink-0"
                     >
                       Restore
@@ -182,6 +169,6 @@ export function ArchivedTasksView({ onBack, projects }: ArchivedTasksViewProps) 
           </div>
         )}
       </main>
-    </div>
+    </PageLayout>
   );
 }

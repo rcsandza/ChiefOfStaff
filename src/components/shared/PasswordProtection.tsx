@@ -47,13 +47,11 @@ export function PasswordProtection({ children, correctPassword = 'taskflow2024' 
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div 
           className="w-full max-w-md bg-card border border-border p-8 shadow-lg"
-          style={{ borderRadius: 'var(--radius-card)' }}
-        >
+                  >
           <div className="flex flex-col items-center mb-6">
             <div 
               className="w-16 h-16 bg-primary/10 flex items-center justify-center mb-4"
-              style={{ borderRadius: 'var(--radius)' }}
-            >
+                          >
               <Lock className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-center mb-2">Welcome to Chief of Staff</h1>
@@ -73,8 +71,7 @@ export function PasswordProtection({ children, correctPassword = 'taskflow2024' 
                 }}
                 placeholder="Enter password"
                 className="w-full"
-                style={{ borderRadius: 'var(--radius-input)' }}
-                autoFocus
+                                autoFocus
               />
               {error && (
                 <p className="text-destructive mt-2" style={{ fontSize: 'var(--text-sm)' }}>
@@ -86,8 +83,7 @@ export function PasswordProtection({ children, correctPassword = 'taskflow2024' 
             <Button
               type="submit"
               className="w-full"
-              style={{ borderRadius: 'var(--radius-button)' }}
-            >
+                          >
               Unlock
             </Button>
           </form>

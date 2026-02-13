@@ -1,17 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task, Project, Attachment } from '@/utils/types';
 import { fetchAttachments, updateTask, uploadAttachment, deleteAttachment } from '@/utils/api';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Paperclip, Trash2, Upload, Download, Save, Bold, Italic, List, ListOrdered, Code, Link as LinkIcon } from 'lucide-react';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { Paperclip, Trash2, Upload, Download, Save } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ReactMarkdown from 'react-markdown';
-import remarkBreaks from 'remark-breaks';
 
 interface TaskDetailDrawerProps {
   task: Task | null;
@@ -30,11 +27,6 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
   const [isSaving, setIsSaving] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [showLinkDialog, setShowLinkDialog] = useState(false);
-  const [linkText, setLinkText] = useState('');
-  const [linkUrl, setLinkUrl] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   useEffect(() => {
     if (task) {
@@ -46,11 +38,11 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
   
   const loadAttachments = async () => {
     if (!task) return;
-    try {
-      const atts = await fetchAttachments(task.id);
-      setAttachments(atts);
-    } catch (error) {
-      console.error('Error loading attachments:', error);
+    const { data, error } = await fetchAttachments(task.id);
+    if (data) {
+      setAttachments(data);
+    } else if (error) {
+      console.error('Failed to load attachments:', error);
     }
   };
   
@@ -75,98 +67,6 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
     setEditedTask(updated);
   };
   
-  const insertMarkdown = (syntax: string, placeholder: string = '') => {
-    if (!textareaRef.current || !editedTask) return;
-    
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = editedTask.description.substring(start, end);
-    const textToInsert = selectedText || placeholder;
-    
-    let newText = '';
-    let cursorOffset = 0;
-    
-    switch (syntax) {
-      case 'bold':
-        newText = editedTask.description.substring(0, start) + `**${textToInsert}**` + editedTask.description.substring(end);
-        cursorOffset = start + 2 + textToInsert.length;
-        break;
-      case 'italic':
-        newText = editedTask.description.substring(0, start) + `*${textToInsert}*` + editedTask.description.substring(end);
-        cursorOffset = start + 1 + textToInsert.length;
-        break;
-      case 'list':
-        const listText = textToInsert || 'List item';
-        newText = editedTask.description.substring(0, start) + `\n- ${listText}` + editedTask.description.substring(end);
-        cursorOffset = start + 3 + listText.length;
-        break;
-      case 'numbered':
-        const numberedText = textToInsert || 'List item';
-        newText = editedTask.description.substring(0, start) + `\n1. ${numberedText}` + editedTask.description.substring(end);
-        cursorOffset = start + 4 + numberedText.length;
-        break;
-      case 'code':
-        newText = editedTask.description.substring(0, start) + `\`${textToInsert}\`` + editedTask.description.substring(end);
-        cursorOffset = start + 1 + textToInsert.length;
-        break;
-    }
-    
-    handleUpdate('description', newText);
-    
-    // Restore focus and cursor position
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(cursorOffset, cursorOffset);
-    }, 0);
-  };
-  
-  const handleOpenLinkDialog = () => {
-    if (!textareaRef.current || !editedTask) return;
-    
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = editedTask.description.substring(start, end);
-    
-    // Pre-fill with selected text if any
-    setLinkText(selectedText || '');
-    setLinkUrl('');
-    setShowLinkDialog(true);
-  };
-  
-  const handleInsertLink = () => {
-    if (!textareaRef.current || !editedTask || !linkText.trim() || !linkUrl.trim()) return;
-    
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    
-    // Ensure URL has protocol
-    let formattedUrl = linkUrl.trim();
-    if (!formattedUrl.match(/^https?:\/\//i)) {
-      formattedUrl = 'https://' + formattedUrl;
-    }
-    
-    // Format: [Link Text](URL)
-    const linkMarkdown = `[${linkText.trim()}](${formattedUrl})`;
-    const newText = editedTask.description.substring(0, start) + linkMarkdown + editedTask.description.substring(end);
-    
-    handleUpdate('description', newText);
-    
-    // Reset dialog
-    setLinkText('');
-    setLinkUrl('');
-    setShowLinkDialog(false);
-    
-    // Restore focus and set cursor after the inserted link
-    setTimeout(() => {
-      textarea.focus();
-      const cursorPosition = start + linkMarkdown.length;
-      textarea.setSelectionRange(cursorPosition, cursorPosition);
-    }, 0);
-  };
-  
   const handleSave = async () => {
     if (!editedTask || !originalTask) return;
     
@@ -189,12 +89,10 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
       // Update original task to reflect saved state
       setOriginalTask({ ...editedTask });
       
-      console.log('✅ Task saved successfully');
       
       // Close the drawer after successful save
       onClose();
     } catch (error) {
-      console.error('❌ Error saving task:', error);
       alert('Failed to save task. Please try again.');
     } finally {
       setIsSaving(false);
@@ -210,7 +108,6 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
       const newAttachment = await uploadAttachment(task.id, file);
       setAttachments([...attachments, newAttachment]);
     } catch (error) {
-      console.error('Error uploading file:', error);
     } finally {
       setIsUploading(false);
     }
@@ -221,7 +118,6 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
       await deleteAttachment(id);
       setAttachments(attachments.filter(a => a.id !== id));
     } catch (error) {
-      console.error('Error deleting attachment:', error);
     }
   };
   
@@ -277,121 +173,19 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 value={editedTask.title}
                 onChange={(e) => handleUpdate('title', e.target.value)}
                 className="mt-2"
-                style={{ borderRadius: 'var(--radius-input)' }}
+               
               />
             </div>
             
             {/* Description */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label>Description / Notes</Label>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowPreview(!showPreview)}
-                    className="h-auto px-2 py-1 caption"
-                  >
-                    {showPreview ? 'Edit' : 'Preview'}
-                  </Button>
-                </div>
-              </div>
-              
-              {!showPreview ? (
-                <>
-                  {/* Markdown toolbar */}
-                  <div className="flex items-center gap-1 mb-2 p-2 bg-muted border border-border" style={{ borderRadius: 'var(--radius)' }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => insertMarkdown('bold', 'bold text')}
-                      className="h-auto p-1"
-                      title="Bold"
-                    >
-                      <Bold className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => insertMarkdown('italic', 'italic text')}
-                      className="h-auto p-1"
-                      title="Italic"
-                    >
-                      <Italic className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleOpenLinkDialog}
-                      className="h-auto p-1"
-                      title="Insert Link"
-                    >
-                      <LinkIcon className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => insertMarkdown('list', 'list item')}
-                      className="h-auto p-1"
-                      title="Bulleted List"
-                    >
-                      <List className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => insertMarkdown('numbered', 'list item')}
-                      className="h-auto p-1"
-                      title="Numbered List"
-                    >
-                      <ListOrdered className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => insertMarkdown('code', 'code')}
-                      className="h-auto p-1"
-                      title="Code"
-                    >
-                      <Code className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  <Textarea
-                    ref={textareaRef}
-                    value={editedTask.description}
-                    onChange={(e) => handleUpdate('description', e.target.value)}
-                    className="font-mono"
-                    rows={8}
-                    placeholder="Use markdown formatting: **bold**, *italic*, - lists, etc."
-                    style={{ borderRadius: 'var(--radius-input)', fontSize: 'var(--text-sm)' }}
-                  />
-                </>
-              ) : (
-                <div 
-                  className="p-3 border border-border bg-muted prose prose-sm max-w-none min-h-[200px]"
-                  style={{ borderRadius: 'var(--radius-input)' }}
-                >
-                  {editedTask.description ? (
-                    <ReactMarkdown
-                      remarkPlugins={[remarkBreaks]}
-                      components={{
-                        a: ({ node, ...props }) => (
-                          <a
-                            {...props}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          />
-                        ),
-                      }}
-                    >
-                      {editedTask.description}
-                    </ReactMarkdown>
-                  ) : (
-                    <span className="text-muted-foreground caption">No description</span>
-                  )}
-                </div>
-              )}
+              <Label className="mb-2 block">Description / Notes</Label>
+              <RichTextEditor
+                content={editedTask.description}
+                onChange={(md) => handleUpdate('description', md)}
+                placeholder="Start typing..."
+                minHeight="200px"
+              />
             </div>
             
             {/* Group */}
@@ -401,7 +195,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 value={editedTask.group}
                 onValueChange={(value) => handleUpdate('group', value)}
               >
-                <SelectTrigger className="mt-2" style={{ borderRadius: 'var(--radius-input)' }}>
+                <SelectTrigger className="mt-2">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -418,7 +212,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 value={editedTask.project_id || 'none'}
                 onValueChange={(value) => handleUpdate('project_id', value === 'none' ? null : value)}
               >
-                <SelectTrigger className="mt-2" style={{ borderRadius: 'var(--radius-input)' }}>
+                <SelectTrigger className="mt-2">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -439,7 +233,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 value={editedTask.priority?.toString() || 'none'}
                 onValueChange={(value) => handleUpdate('priority', value === 'none' ? null : parseInt(value))}
               >
-                <SelectTrigger className="mt-2" style={{ borderRadius: 'var(--radius-input)' }}>
+                <SelectTrigger className="mt-2">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -460,7 +254,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 value={editedTask.status}
                 onValueChange={(value) => handleUpdate('status', value)}
               >
-                <SelectTrigger className="mt-2" style={{ borderRadius: 'var(--radius-input)' }}>
+                <SelectTrigger className="mt-2">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -479,14 +273,14 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                   value={editedTask.due_date || ''}
                   onChange={(e) => handleUpdate('due_date', e.target.value || null)}
                   className="flex-1"
-                  style={{ borderRadius: 'var(--radius-input)' }}
+                 
                 />
                 {editedTask.due_date && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleUpdate('due_date', null)}
-                    style={{ borderRadius: 'var(--radius-button)' }}
+                   
                   >
                     Clear
                   </Button>
@@ -501,8 +295,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 {attachments.map(attachment => (
                   <div
                     key={attachment.id}
-                    className="flex items-center justify-between p-3 bg-muted border border-border"
-                    style={{ borderRadius: 'var(--radius)' }}
+                    className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg"
                   >
                     {attachment.signed_url ? (
                       <a
@@ -562,7 +355,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                       e.preventDefault();
                       (e.currentTarget.previousElementSibling as HTMLInputElement)?.click();
                     }}
-                    style={{ borderRadius: 'var(--radius-button)' }}
+                   
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     {isUploading ? 'Uploading...' : 'Upload File'}
@@ -588,7 +381,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
               variant="destructive"
               className="w-full mb-8"
               onClick={handleDelete}
-              style={{ borderRadius: 'var(--radius-button)' }}
+             
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete Task
@@ -602,7 +395,7 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
                 onClick={handleSave}
                 disabled={isSaving}
                 className="w-full"
-                style={{ borderRadius: 'var(--radius-button)' }}
+               
               >
                 <Save className="w-4 h-4 mr-2" />
                 {isSaving ? 'Saving...' : 'Save Changes'}
@@ -631,71 +424,6 @@ export function TaskDetailDrawer({ task, projects, isOpen, onClose, onUpdate, on
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
-      {/* Link Insertion Dialog */}
-      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Insert Link</DialogTitle>
-            <DialogDescription>
-              Add a hyperlink with descriptive text and URL
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="link-text">Link Text</Label>
-              <Input
-                id="link-text"
-                value={linkText}
-                onChange={(e) => setLinkText(e.target.value)}
-                placeholder="Click here"
-                className="mt-2"
-                style={{ borderRadius: 'var(--radius-input)' }}
-                autoFocus
-              />
-            </div>
-            <div>
-              <Label htmlFor="link-url">URL</Label>
-              <Input
-                id="link-url"
-                value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
-                placeholder="example.com or https://example.com"
-                className="mt-2"
-                style={{ borderRadius: 'var(--radius-input)' }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && linkText.trim() && linkUrl.trim()) {
-                    handleInsertLink();
-                  }
-                }}
-              />
-              <p className="caption text-muted-foreground mt-1">
-                Tip: Paste a URL and it will automatically format with https://
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setLinkText('');
-                setLinkUrl('');
-                setShowLinkDialog(false);
-              }}
-              style={{ borderRadius: 'var(--radius-button)' }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleInsertLink}
-              disabled={!linkText.trim() || !linkUrl.trim()}
-              style={{ borderRadius: 'var(--radius-button)' }}
-            >
-              Insert Link
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

@@ -14,6 +14,88 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
+// ========== DATE UTILITIES ==========
+
+// Format date in local timezone as YYYY-MM-DD (avoids timezone offset issues)
+function formatDateLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Validates if a date belongs in a specific section (using same logic as dateUtils.ts)
+function validateDateInSection(dateStr: string, section: string, today: Date): boolean {
+  // Parse date in local timezone to avoid timezone offset issues
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+
+  // Calculate next upcoming Saturday (not including today)
+  const daysUntilSaturday = today.getDay() === 6 ? 7 : (6 - today.getDay());
+  const nextSaturday = new Date(today);
+  nextSaturday.setDate(today.getDate() + daysUntilSaturday);
+
+  // Calculate next upcoming Sunday (not including today)
+  const daysUntilSunday = today.getDay() === 0 ? 7 : (7 - today.getDay());
+  const nextSunday = new Date(today);
+  nextSunday.setDate(today.getDate() + daysUntilSunday);
+
+  // Calculate Saturday after next Sunday
+  const saturdayAfterNextSunday = new Date(nextSunday);
+  saturdayAfterNextSunday.setDate(nextSunday.getDate() + 6);
+
+  switch (section) {
+    case 'today':
+      return date <= today;
+    case 'this-week':
+      return date > today && date <= nextSaturday;
+    case 'next-week':
+      return date > nextSaturday && date <= saturdayAfterNextSunday;
+    case 'after-next-week':
+      return date > saturdayAfterNextSunday;
+    default:
+      return false;
+  }
+}
+
+// Returns today's date as YYYY-MM-DD string
+function getTodayDate(today: Date): string {
+  return formatDateLocal(today);
+}
+
+// Returns tomorrow's date as YYYY-MM-DD string
+function getTomorrowDate(today: Date): string {
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  return formatDateLocal(tomorrow);
+}
+
+// Returns the next upcoming Sunday (if today is Sunday, returns 7 days from now)
+function getNextUpcomingSunday(today: Date): Date {
+  const sunday = new Date(today);
+  const daysUntilSunday = today.getDay() === 0 ? 7 : (7 - today.getDay());
+  sunday.setDate(today.getDate() + daysUntilSunday);
+  return sunday;
+}
+
+// Returns next upcoming Sunday as a string (default for "Next Week" section)
+function getNextUpcomingSundayString(today: Date): string {
+  return formatDateLocal(getNextUpcomingSunday(today));
+}
+
+// Returns the day after Saturday after next Sunday (default for "After Next Week" section)
+function getDayAfterSaturdayAfterNextSunday(today: Date): string {
+  const nextSunday = getNextUpcomingSunday(today);
+  const saturdayAfter = new Date(nextSunday);
+  saturdayAfter.setDate(nextSunday.getDate() + 6); // Saturday after next Sunday
+  const dayAfter = new Date(saturdayAfter);
+  dayAfter.setDate(saturdayAfter.getDate() + 1); // Day after that Saturday (Sunday)
+  return formatDateLocal(dayAfter);
+}
+
+// ========== RETRY UTILITY ==========
+
 // Retry utility with exponential backoff for handling transient errors
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
@@ -43,7 +125,6 @@ async function retryWithBackoff<T>(
       
       // Exponential backoff with jitter
       const delay = initialDelay * Math.pow(2, attempt) + Math.random() * 100;
-      console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${Math.round(delay)}ms due to error:`, error);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -64,17 +145,13 @@ async function initBucket() {
         const { error } = await supabase.storage.createBucket(BUCKET_NAME, { public: false });
         if (error && error.statusCode !== '409') {
           // Only log if it's not a "resource already exists" error
-          console.error('Error creating bucket:', error);
         } else {
-          console.log(`Created bucket: ${BUCKET_NAME}`);
         }
       } else {
-        console.log(`Bucket ${BUCKET_NAME} already exists`);
       }
     });
     bucketInitialized = true;
   } catch (error) {
-    console.error('Error initializing bucket after retries:', error);
     bucketInitialized = false;
   }
 }
@@ -96,10 +173,8 @@ app.get('/make-server-5053ecf8/projects', async (c) => {
   try {
     const projects = await retryWithBackoff(() => kv.getByPrefix('project:'));
     const filteredProjects = projects.filter(p => p);
-    console.log(`Returning ${filteredProjects.length} projects from server`);
     return c.json({ projects: filteredProjects });
   } catch (error) {
-    console.error('Error fetching projects after retries:', error);
     // Return empty array instead of 500 to prevent UI from breaking
     return c.json({ projects: [] }, 200);
   }
@@ -110,20 +185,20 @@ app.post('/make-server-5053ecf8/projects', async (c) => {
   try {
     const body = await c.req.json();
     const { name, color } = body;
-    
+
     const id = crypto.randomUUID();
+    const now = new Date().toISOString();
     const project = {
       id,
       name,
       color: color || '#7E3DD4',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     };
-    
+
     await kv.set(`project:${id}`, project);
     return c.json(project);
   } catch (error) {
-    console.error('Error creating project:', error);
     return c.json({ error: 'Failed to create project' }, 500);
   }
 });
@@ -145,11 +220,9 @@ app.put('/make-server-5053ecf8/projects/:id', async (c) => {
       updated_at: new Date().toISOString(),
     };
     
-    console.log('Updating project:', id, 'with data:', updatedProject);
     await kv.set(`project:${id}`, updatedProject);
     return c.json(updatedProject);
   } catch (error) {
-    console.error('Error updating project:', error);
     return c.json({ error: 'Failed to update project' }, 500);
   }
 });
@@ -164,11 +237,9 @@ app.delete('/make-server-5053ecf8/projects/:id', async (c) => {
       return c.json({ error: 'Project not found' }, 404);
     }
     
-    console.log('Deleting project:', id);
     await kv.del(`project:${id}`);
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error deleting project:', error);
     return c.json({ error: 'Failed to delete project' }, 500);
   }
 });
@@ -182,10 +253,8 @@ app.get('/make-server-5053ecf8/tasks', async (c) => {
       ...t,
       task_type: t.task_type || 'regular',
     }));
-    console.log(`Returning ${filteredTasks.length} tasks from server`);
     return c.json({ tasks: filteredTasks });
   } catch (error) {
-    console.error('Error fetching tasks after retries:', error);
     // Return empty array instead of 500 to prevent UI from breaking
     return c.json({ tasks: [] }, 200);
   }
@@ -200,10 +269,8 @@ app.get('/make-server-5053ecf8/tasks/archived', async (c) => {
       ...t,
       task_type: t.task_type || 'regular',
     }));
-    console.log(`Returning ${archivedTasks.length} archived tasks from server`);
     return c.json({ tasks: archivedTasks });
   } catch (error) {
-    console.error('Error fetching archived tasks after retries:', error);
     // Return empty array instead of 500 to prevent UI from breaking
     return c.json({ tasks: [] }, 200);
   }
@@ -214,11 +281,12 @@ app.post('/make-server-5053ecf8/tasks', async (c) => {
   try {
     const body = await c.req.json();
     const { title, description, group, project_id, due_date, priority, task_type } = body;
-    
+
     const id = crypto.randomUUID();
+    const now = new Date().toISOString();
     // Normalize due_date: convert empty string to null
     const normalizedDueDate = due_date || null;
-    
+
     const task = {
       id,
       title,
@@ -234,16 +302,13 @@ app.post('/make-server-5053ecf8/tasks', async (c) => {
       completed_at: null,
       archived_at: null,
       deleted_at: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     };
-    
-    console.log('Creating task with data:', task);
-    
+
     await kv.set(`task:${id}`, task);
     return c.json(task);
   } catch (error) {
-    console.error('Error creating task:', error);
     return c.json({ error: 'Failed to create task' }, 500);
   }
 });
@@ -284,11 +349,9 @@ app.put('/make-server-5053ecf8/tasks/:id', async (c) => {
       }
     }
     
-    console.log('Updating task:', id, 'with data:', updatedTask);
     await kv.set(`task:${id}`, updatedTask);
     return c.json(updatedTask);
   } catch (error) {
-    console.error('Error updating task:', error);
     return c.json({ error: 'Failed to update task' }, 500);
   }
 });
@@ -316,7 +379,6 @@ app.delete('/make-server-5053ecf8/tasks/:id', async (c) => {
     const attachments = await retryWithBackoff(() => kv.getByPrefix(`attachment:${id}:`));
     for (const att of attachments) {
       if (!att || !att.id) {
-        console.warn('Skipping invalid attachment:', att);
         continue;
       }
       
@@ -328,14 +390,12 @@ app.delete('/make-server-5053ecf8/tasks/:id', async (c) => {
         try {
           await supabase.storage.from(BUCKET_NAME).remove([att.file_path]);
         } catch (err) {
-          console.error('Error deleting file from storage:', err);
         }
       }
     }
     
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error deleting task:', error);
     return c.json({ error: 'Failed to delete task' }, 500);
   }
 });
@@ -356,11 +416,9 @@ app.post('/make-server-5053ecf8/tasks/:id/archive', async (c) => {
       updated_at: new Date().toISOString(),
     };
     
-    console.log('Archiving task:', id);
     await kv.set(`task:${id}`, archivedTask);
     return c.json(archivedTask);
   } catch (error) {
-    console.error('Error archiving task:', error);
     return c.json({ error: 'Failed to archive task' }, 500);
   }
 });
@@ -369,40 +427,30 @@ app.post('/make-server-5053ecf8/tasks/:id/archive', async (c) => {
 app.post('/make-server-5053ecf8/tasks/:id/snooze', async (c) => {
   try {
     const id = c.req.param('id');
-    
+
     // Try to parse the body, but handle empty body gracefully
     let clientToday: string | undefined;
     try {
       const body = await c.req.json();
       clientToday = body.clientToday;
     } catch (jsonError) {
-      console.log('No JSON body provided for snooze, will use server time');
     }
-    
+
     const existingTask = await retryWithBackoff(() => kv.get(`task:${id}`));
     if (!existingTask) {
       return c.json({ error: 'Task not found' }, 404);
     }
-    
+
     // Validate clientToday parameter
     if (!clientToday) {
-      console.error('Missing clientToday parameter in snooze request');
       return c.json({ error: 'Missing clientToday parameter' }, 400);
     }
-    
-    // Format date in local timezone as YYYY-MM-DD (avoids timezone offset issues)
-    const formatDateLocal = (date: Date): string => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-    
+
     // Use client's local "today" date to avoid timezone issues
     const [year, month, day] = clientToday.split('-').map(Number);
     const today = new Date(year, month - 1, day);
     today.setHours(0, 0, 0, 0);
-    
+
     // Parse the existing due date in local timezone (not UTC) to avoid timezone issues
     let currentDueDate = today;
     if (existingTask.due_date) {
@@ -410,21 +458,20 @@ app.post('/make-server-5053ecf8/tasks/:id/snooze', async (c) => {
       currentDueDate = new Date(dueYear, dueMonth - 1, dueDay);
       currentDueDate.setHours(0, 0, 0, 0);
     }
-    
+
     const newDueDate = new Date(Math.max(today.getTime(), currentDueDate.getTime()));
     newDueDate.setDate(newDueDate.getDate() + 1);
-    
+
     const updatedTask = {
       ...existingTask,
       due_date: formatDateLocal(newDueDate),
       is_longer_term: false,
       updated_at: new Date().toISOString(),
     };
-    
+
     await kv.set(`task:${id}`, updatedTask);
     return c.json(updatedTask);
   } catch (error) {
-    console.error('Error snoozing task:', error);
     return c.json({ error: 'Failed to snooze task' }, 500);
   }
 });
@@ -435,109 +482,26 @@ app.post('/make-server-5053ecf8/tasks/:id/reorder', async (c) => {
     const id = c.req.param('id');
     const body = await c.req.json();
     const { targetSection, beforeTaskId, afterTaskId, clientToday } = body;
-    
+
     const existingTask = await retryWithBackoff(() => kv.get(`task:${id}`));
     if (!existingTask) {
       return c.json({ error: 'Task not found' }, 404);
     }
-    
+
     // Validate clientToday parameter
     if (!clientToday) {
-      console.error('Missing clientToday parameter in reorder request');
       return c.json({ error: 'Missing clientToday parameter' }, 400);
     }
-    
+
     // Use client's local "today" date to avoid timezone issues
-    // Parse the clientToday string (YYYY-MM-DD) into a Date object
     const [year, month, day] = clientToday.split('-').map(Number);
     const today = new Date(year, month - 1, day);
     today.setHours(0, 0, 0, 0);
-    
-    // ========== HELPER FUNCTIONS FOR DATE CALCULATION ==========
-    
-    // Format date in local timezone as YYYY-MM-DD (avoids timezone offset issues)
-    const formatDateLocal = (date: Date): string => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-    
-    // Returns today's date as YYYY-MM-DD string
-    const getTodayDate = (): string => {
-      return formatDateLocal(today);
-    };
-    
-    // Returns tomorrow's date as YYYY-MM-DD string
-    const getTomorrowDate = (): string => {
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
-      return formatDateLocal(tomorrow);
-    };
-    
-    // Returns the next upcoming Sunday (if today is Sunday, returns 7 days from now)
-    const getNextUpcomingSunday = (): Date => {
-      const sunday = new Date(today);
-      const daysUntilSunday = today.getDay() === 0 ? 7 : (7 - today.getDay());
-      sunday.setDate(today.getDate() + daysUntilSunday);
-      return sunday;
-    };
-    
-    // Returns next upcoming Sunday as a string (default for "Next Week" section)
-    const getNextUpcomingSundayString = (): string => {
-      return formatDateLocal(getNextUpcomingSunday());
-    };
-    
-    // Returns the day after Saturday after next Sunday (default for "After Next Week" section)
-    const getDayAfterSaturdayAfterNextSunday = (): string => {
-      const nextSunday = getNextUpcomingSunday();
-      const saturdayAfter = new Date(nextSunday);
-      saturdayAfter.setDate(nextSunday.getDate() + 6); // Saturday after next Sunday
-      const dayAfter = new Date(saturdayAfter);
-      dayAfter.setDate(saturdayAfter.getDate() + 1); // Day after that Saturday (Sunday)
-      return formatDateLocal(dayAfter);
-    };
-    
-    // Validates if a date belongs in a specific section (using same logic as dateUtils.ts)
-    const validateDateInSection = (dateStr: string, section: string): boolean => {
-      // Parse date in local timezone to avoid timezone offset issues
-      const [year, month, day] = dateStr.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      date.setHours(0, 0, 0, 0);
-      
-      // Calculate next upcoming Saturday (not including today)
-      const daysUntilSaturday = today.getDay() === 6 ? 7 : (6 - today.getDay());
-      const nextSaturday = new Date(today);
-      nextSaturday.setDate(today.getDate() + daysUntilSaturday);
-      
-      // Calculate next upcoming Sunday (not including today)
-      const daysUntilSunday = today.getDay() === 0 ? 7 : (7 - today.getDay());
-      const nextSunday = new Date(today);
-      nextSunday.setDate(today.getDate() + daysUntilSunday);
-      
-      // Calculate Saturday after next Sunday
-      const saturdayAfterNextSunday = new Date(nextSunday);
-      saturdayAfterNextSunday.setDate(nextSunday.getDate() + 6);
-      
-      switch (section) {
-        case 'today':
-          return date <= today;
-        case 'this-week':
-          return date > today && date <= nextSaturday;
-        case 'next-week':
-          return date > nextSaturday && date <= saturdayAfterNextSunday;
-        case 'after-next-week':
-          return date > saturdayAfterNextSunday;
-        default:
-          return false;
-      }
-    };
-    
+
     // ========== DATE ASSIGNMENT LOGIC ==========
-    
+
     let newDueDate: string | null = null;
-    let inheritedDate: string | null = null;
-    
+
     // Special handling for personal-focus section
     if (targetSection === 'personal-focus') {
       // For personal-focus, preserve the existing due_date and only update order_rank
@@ -548,27 +512,26 @@ app.post('/make-server-5053ecf8/tasks/:id/reorder', async (c) => {
         const beforeTask = await retryWithBackoff(() => kv.get(`task:${beforeTaskId}`));
         if (beforeTask && beforeTask.due_date) {
           // Validate that the inherited date actually belongs in the target section
-          if (validateDateInSection(beforeTask.due_date, targetSection)) {
-            inheritedDate = beforeTask.due_date;
-            newDueDate = inheritedDate;
+          if (validateDateInSection(beforeTask.due_date, targetSection, today)) {
+            newDueDate = beforeTask.due_date;
           }
         }
       }
-      
+
       // If we didn't inherit a date, use section-specific defaults
       if (!newDueDate) {
         switch (targetSection) {
           case 'today':
-            newDueDate = getTodayDate();
+            newDueDate = getTodayDate(today);
             break;
           case 'this-week':
-            newDueDate = getTomorrowDate();
+            newDueDate = getTomorrowDate(today);
             break;
           case 'next-week':
-            newDueDate = getNextUpcomingSundayString();
+            newDueDate = getNextUpcomingSundayString(today);
             break;
           case 'after-next-week':
-            newDueDate = getDayAfterSaturdayAfterNextSunday();
+            newDueDate = getDayAfterSaturdayAfterNextSunday(today);
             break;
           case 'longer-term':
             newDueDate = null;
@@ -576,16 +539,16 @@ app.post('/make-server-5053ecf8/tasks/:id/reorder', async (c) => {
         }
       }
     }
-    
+
     // ========== ORDER RANK CALCULATION ==========
-    
+
     let newOrderRank: number;
-    
+
     if (beforeTaskId && afterTaskId) {
       // Dropped between two tasks
       const beforeTask = await kv.get(`task:${beforeTaskId}`);
       const afterTask = await kv.get(`task:${afterTaskId}`);
-      
+
       if (beforeTask && afterTask) {
         newOrderRank = (beforeTask.order_rank + afterTask.order_rank) / 2;
       } else if (beforeTask) {
@@ -607,9 +570,9 @@ app.post('/make-server-5053ecf8/tasks/:id/reorder', async (c) => {
       // Dropped into an empty section
       newOrderRank = Date.now();
     }
-    
+
     // ========== UPDATE TASK ==========
-    
+
     const updatedTask = {
       ...existingTask,
       due_date: newDueDate,
@@ -617,32 +580,10 @@ app.post('/make-server-5053ecf8/tasks/:id/reorder', async (c) => {
       order_rank: newOrderRank,
       updated_at: new Date().toISOString(),
     };
-    
-    // ========== LOGGING FOR DEBUGGING ==========
-    
-    console.log('========== REORDER TASK ==========');
-    console.log('Task ID:', id);
-    console.log('Task Title:', existingTask.title);
-    console.log('Target Section:', targetSection);
-    console.log('Before Task ID:', beforeTaskId);
-    console.log('After Task ID:', afterTaskId);
-    console.log('---');
-    console.log('Old Due Date:', existingTask.due_date);
-    console.log('New Due Date:', newDueDate);
-    console.log('Inherited Date:', inheritedDate || 'N/A');
-    console.log('---');
-    console.log('Today:', getTodayDate());
-    console.log('Tomorrow:', getTomorrowDate());
-    console.log('Next Sunday (Next Week default):', getNextUpcomingSundayString());
-    console.log('Day After Saturday After Next Sunday (After Next Week default):', getDayAfterSaturdayAfterNextSunday());
-    console.log('---');
-    console.log('New Order Rank:', newOrderRank);
-    console.log('==================================');
-    
+
     await kv.set(`task:${id}`, updatedTask);
     return c.json(updatedTask);
   } catch (error) {
-    console.error('Error reordering task:', error);
     return c.json({ error: 'Failed to reorder task' }, 500);
   }
 });
@@ -651,7 +592,6 @@ app.post('/make-server-5053ecf8/tasks/:id/reorder', async (c) => {
 app.get('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
   try {
     const taskId = c.req.param('id');
-    console.log(`[Attachments] Fetching attachments for task: ${taskId}`);
     
     // Wrap KV call in try-catch to handle potential KV errors with retry logic
     let attachments = [];
@@ -661,25 +601,20 @@ app.get('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
         3,
         200
       );
-      console.log(`[Attachments] Found ${attachments.length} raw attachments for task ${taskId}`);
     } catch (kvError) {
-      console.error(`[Attachments] KV error fetching attachments for task ${taskId} after retries:`, kvError);
       // Return empty array if KV fails after retries
       return c.json({ attachments: [] }, 200);
     }
     
     // If no attachments, return empty array immediately
     if (!attachments || attachments.length === 0) {
-      console.log(`[Attachments] No attachments found for task ${taskId}, returning empty array`);
       return c.json({ attachments: [] }, 200);
     }
     
     // Filter out any null/undefined attachments
     const validAttachments = attachments.filter(att => att && att.file_path);
-    console.log(`[Attachments] Valid attachments after filtering: ${validAttachments.length}`);
     
     if (validAttachments.length === 0) {
-      console.log(`[Attachments] No valid attachments after filtering, returning empty array`);
       return c.json({ attachments: [] }, 200);
     }
     
@@ -688,10 +623,8 @@ app.get('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
     let attachmentsWithUrls = [];
     
     if (!bucketInitialized) {
-      console.warn(`[Attachments] Bucket not initialized, returning attachments without signed URLs`);
       attachmentsWithUrls = validAttachments.map(att => ({ ...att, signed_url: null }));
     } else {
-      console.log(`[Attachments] Creating signed URLs for ${validAttachments.length} attachments`);
       attachmentsWithUrls = await Promise.all(
         validAttachments.map(async (att) => {
           try {
@@ -700,7 +633,6 @@ app.get('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
               .createSignedUrl(att.file_path, 3600); // 1 hour expiry
             
             if (error) {
-              console.error(`[Attachments] Error creating signed URL for attachment ${att.id}:`, error);
               return {
                 ...att,
                 signed_url: null,
@@ -712,7 +644,6 @@ app.get('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
               signed_url: data?.signedUrl || null,
             };
           } catch (err) {
-            console.error(`[Attachments] Exception creating signed URL for attachment ${att.id}:`, err);
             return {
               ...att,
               signed_url: null,
@@ -722,10 +653,8 @@ app.get('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
       );
     }
     
-    console.log(`[Attachments] Successfully returning ${attachmentsWithUrls.length} attachments with URLs for task ${taskId}`);
     return c.json({ attachments: attachmentsWithUrls }, 200);
   } catch (error) {
-    console.error(`[Attachments] Critical error fetching attachments for task ${c.req.param('id')}:`, error);
     // Return empty array with 200 status instead of error to prevent UI from breaking
     return c.json({ attachments: [] }, 200);
   }
@@ -755,7 +684,6 @@ app.post('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
       });
     
     if (uploadError) {
-      console.error('Upload error:', uploadError);
       return c.json({ error: 'Failed to upload file' }, 500);
     }
     
@@ -782,7 +710,6 @@ app.post('/make-server-5053ecf8/tasks/:id/attachments', async (c) => {
       signed_url: data?.signedUrl || null,
     });
   } catch (error) {
-    console.error('Error uploading attachment:', error);
     return c.json({ error: 'Failed to upload attachment' }, 500);
   }
 });
@@ -809,7 +736,6 @@ app.delete('/make-server-5053ecf8/attachments/:id', async (c) => {
     
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error deleting attachment:', error);
     return c.json({ error: 'Failed to delete attachment' }, 500);
   }
 });
@@ -825,14 +751,11 @@ app.get('/make-server-5053ecf8/meeting-actions', async (c) => {
     });
 
     if (error) {
-      console.error('Error fetching meeting actions:', error);
       return c.json({ meeting_actions: [] }, 200);
     }
 
-    console.log(`Returning ${data?.length || 0} meeting actions from server`);
     return c.json({ meeting_actions: data || [] });
   } catch (error) {
-    console.error('Error fetching meeting actions after retries:', error);
     return c.json({ meeting_actions: [] }, 200);
   }
 });
@@ -865,9 +788,7 @@ app.post('/make-server-5053ecf8/meeting-actions', async (c) => {
     });
 
     if (checkError) {
-      console.error('Error checking for existing meeting action:', checkError);
     } else if (existingActions && existingActions.length > 0) {
-      console.log('Meeting action already exists, returning existing:', existingActions[0].id);
       return c.json(existingActions[0]);
     }
 
@@ -885,7 +806,6 @@ app.post('/make-server-5053ecf8/meeting-actions', async (c) => {
       source_meeting_url: source_meeting_url || null,
     };
 
-    console.log('Creating meeting action:', meetingAction);
 
     const { data, error } = await retryWithBackoff(async () => {
       return await supabase
@@ -896,13 +816,11 @@ app.post('/make-server-5053ecf8/meeting-actions', async (c) => {
     });
 
     if (error) {
-      console.error('Error creating meeting action:', error);
       return c.json({ error: 'Failed to create meeting action' }, 500);
     }
 
     return c.json(data);
   } catch (error) {
-    console.error('Error creating meeting action:', error);
     return c.json({ error: 'Failed to create meeting action' }, 500);
   }
 });
@@ -918,7 +836,6 @@ app.put('/make-server-5053ecf8/meeting-actions/:id', async (c) => {
       updated_at: new Date().toISOString(),
     };
 
-    console.log('Updating meeting action:', id, 'with data:', updatedFields);
 
     const { data, error } = await retryWithBackoff(async () => {
       return await supabase
@@ -930,7 +847,6 @@ app.put('/make-server-5053ecf8/meeting-actions/:id', async (c) => {
     });
 
     if (error) {
-      console.error('Error updating meeting action:', error);
       if (error.code === 'PGRST116') {
         return c.json({ error: 'Meeting action not found' }, 404);
       }
@@ -939,7 +855,6 @@ app.put('/make-server-5053ecf8/meeting-actions/:id', async (c) => {
 
     return c.json(data);
   } catch (error) {
-    console.error('Error updating meeting action:', error);
     return c.json({ error: 'Failed to update meeting action' }, 500);
   }
 });
@@ -949,20 +864,16 @@ app.delete('/make-server-5053ecf8/meeting-actions/:id', async (c) => {
   try {
     const id = c.req.param('id');
 
-    const deletedAt = new Date().toISOString();
-    const updatedAt = new Date().toISOString();
-
-    console.log('Soft deleting meeting action:', id);
+    const now = new Date().toISOString();
 
     const { error } = await retryWithBackoff(async () => {
       return await supabase
         .from('meeting_actions')
-        .update({ deleted_at: deletedAt, updated_at: updatedAt })
+        .update({ deleted_at: now, updated_at: now })
         .eq('id', id);
     });
 
     if (error) {
-      console.error('Error deleting meeting action:', error);
       if (error.code === 'PGRST116') {
         return c.json({ error: 'Meeting action not found' }, 404);
       }
@@ -971,7 +882,6 @@ app.delete('/make-server-5053ecf8/meeting-actions/:id', async (c) => {
 
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error deleting meeting action:', error);
     return c.json({ error: 'Failed to delete meeting action' }, 500);
   }
 });
@@ -987,14 +897,11 @@ app.get('/make-server-5053ecf8/meetings', async (c) => {
     });
 
     if (error) {
-      console.error('Error fetching meetings:', error);
       return c.json({ meetings: [] }, 200);
     }
 
-    console.log(`Returning ${data?.length || 0} meetings from server`);
     return c.json({ meetings: data || [] });
   } catch (error) {
-    console.error('Error fetching meetings after retries:', error);
     return c.json({ meetings: [] }, 200);
   }
 });
@@ -1013,7 +920,6 @@ app.get('/make-server-5053ecf8/meetings/:id', async (c) => {
     });
 
     if (error) {
-      console.error('Error fetching meeting:', error);
       return c.json({ error: 'Failed to fetch meeting' }, 500);
     }
 
@@ -1023,7 +929,6 @@ app.get('/make-server-5053ecf8/meetings/:id', async (c) => {
 
     return c.json(data);
   } catch (error) {
-    console.error('Error fetching meeting:', error);
     return c.json({ error: 'Failed to fetch meeting' }, 500);
   }
 });
@@ -1058,7 +963,6 @@ app.post('/make-server-5053ecf8/meetings', async (c) => {
       url: url || null,
     };
 
-    console.log('Creating/updating meeting:', id);
 
     const { data, error } = await retryWithBackoff(async () => {
       return await supabase
@@ -1069,13 +973,11 @@ app.post('/make-server-5053ecf8/meetings', async (c) => {
     });
 
     if (error) {
-      console.error('Error creating meeting:', error);
       return c.json({ error: 'Failed to create meeting' }, 500);
     }
 
     return c.json(data);
   } catch (error) {
-    console.error('Error creating meeting:', error);
     return c.json({ error: 'Failed to create meeting' }, 500);
   }
 });
@@ -1091,14 +993,11 @@ app.get('/make-server-5053ecf8/sync-runs', async (c) => {
     });
 
     if (error) {
-      console.error('Error fetching sync runs:', error);
       return c.json({ sync_runs: [] }, 200);
     }
 
-    console.log(`Returning ${data?.length || 0} sync runs from server`);
     return c.json({ sync_runs: data || [] });
   } catch (error) {
-    console.error('Error fetching sync runs after retries:', error);
     return c.json({ sync_runs: [] }, 200);
   }
 });
@@ -1127,7 +1026,6 @@ app.post('/make-server-5053ecf8/sync-runs', async (c) => {
       errors: errors || [],
     };
 
-    console.log('Creating sync run:', syncRun);
 
     const { data, error } = await retryWithBackoff(async () => {
       return await supabase
@@ -1138,13 +1036,11 @@ app.post('/make-server-5053ecf8/sync-runs', async (c) => {
     });
 
     if (error) {
-      console.error('Error creating sync run:', error);
       return c.json({ error: 'Failed to create sync run' }, 500);
     }
 
     return c.json(data);
   } catch (error) {
-    console.error('Error creating sync run:', error);
     return c.json({ error: 'Failed to create sync run' }, 500);
   }
 });

@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Project } from '@/utils/types';
+import { formatDateISO, getToday } from '@/utils/dateUtils';
 
 interface QuickAddBarProps {
   onAdd: (data: {
@@ -27,15 +28,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow;
   };
-  
-  // Format date in local timezone as YYYY-MM-DD
-  const formatDateLocal = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [showDescription, setShowDescription] = useState(false);
@@ -44,14 +37,14 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [taskType, setTaskType] = useState<'regular' | 'work-focus' | 'to-read'>('regular');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
       onAdd({
         title: title.trim(),
         description: description.trim(),
-        due_date: (taskType === 'work-focus' || taskType === 'to-read') ? null : (dueDate ? formatDateLocal(dueDate) : null),
+        due_date: (taskType === 'work-focus' || taskType === 'to-read') ? null : (dueDate ? formatDateISO(dueDate) : null),
         group: taskType === 'work-focus' ? 'work' : group,
         project_id: projectId,
         task_type: taskType,
@@ -70,18 +63,17 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
   
   const getDateButtonText = () => {
     if (!dueDate) return 'Backlog';
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+
+    const today = getToday();
     const selected = new Date(dueDate);
     selected.setHours(0, 0, 0, 0);
-    
+
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    
+
     if (selected.getTime() === today.getTime()) return 'Today';
     if (selected.getTime() === tomorrow.getTime()) return 'This Week';
-    
+
     return dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
   
@@ -113,13 +105,12 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
         
         {/* Description Field (conditionally shown) */}
         {showDescription && (
-          <div className="mb-3">
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+          <div className="mb-3 flex-1">
+            <RichTextEditor
+              content={description}
+              onChange={setDescription}
               placeholder="Add a description..."
-              className="w-full min-h-[80px] resize-none"
-              style={{ borderRadius: 'var(--radius-input)' }}
+              minHeight="200px"
             />
           </div>
         )}
@@ -135,8 +126,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
           }}>
             <SelectTrigger
               className="w-auto gap-2"
-              style={{ borderRadius: 'var(--radius-button)' }}
-            >
+                          >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -168,8 +158,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
             size="sm"
             onClick={() => setShowDescription(!showDescription)}
             className="gap-2"
-            style={{ borderRadius: 'var(--radius-button)' }}
-          >
+                      >
             <AlignLeft className="w-4 h-4" />
           </Button>
           
@@ -182,8 +171,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                style={{ borderRadius: 'var(--radius-button)' }}
-              >
+                              >
                 <Calendar className="w-4 h-4" />
                 {getDateButtonText()}
               </Button>
@@ -196,8 +184,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setQuickDate(0)}
-                    style={{ borderRadius: 'var(--radius-button)' }}
-                  >
+                                      >
                     Today
                   </Button>
                   <Button
@@ -205,8 +192,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setQuickDate(1)}
-                    style={{ borderRadius: 'var(--radius-button)' }}
-                  >
+                                      >
                     This Week
                   </Button>
                   <Button
@@ -214,8 +200,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setQuickDate(7)}
-                    style={{ borderRadius: 'var(--radius-button)' }}
-                  >
+                                      >
                     Next Week
                   </Button>
                   <Button
@@ -223,8 +208,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setQuickDate(14)}
-                    style={{ borderRadius: 'var(--radius-button)' }}
-                  >
+                                      >
                     After Next Week
                   </Button>
                   <Button
@@ -232,8 +216,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => setQuickDate(null)}
-                    style={{ borderRadius: 'var(--radius-button)' }}
-                  >
+                                      >
                     Backlog
                   </Button>
                 </div>
@@ -256,8 +239,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
             <Select value={group} onValueChange={(value: 'personal' | 'work') => setGroup(value)}>
             <SelectTrigger
               className="w-auto gap-2"
-              style={{ borderRadius: 'var(--radius-button)' }}
-            >
+                          >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -282,8 +264,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
             <Select value={projectId || 'none'} onValueChange={(value) => setProjectId(value === 'none' ? null : value)}>
               <SelectTrigger
                 className="w-auto"
-                style={{ borderRadius: 'var(--radius-button)' }}
-              >
+                              >
                 <SelectValue placeholder="No project" />
               </SelectTrigger>
               <SelectContent>
@@ -309,8 +290,7 @@ export function QuickAddBar({ onAdd, projects }: QuickAddBarProps) {
           <Button
             type="submit"
             className="gap-2"
-            style={{ borderRadius: 'var(--radius-button)' }}
-          >
+                      >
             <Plus className="w-4 h-4" />
             Add Task
           </Button>
